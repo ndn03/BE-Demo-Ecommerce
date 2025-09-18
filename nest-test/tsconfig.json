@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@configs/*": [
+        "src/configs/*"
+      ],
+      "@entities/*": [
+        "src/entities/*"
+      ],
+      "@filters/*": [
+        "src/filters/*"
+      ],
+      "@languages/*": [
+        "src/languages/*"
+      ],
+      "@interceptors/*": [
+        "src/interceptors/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@general/*": [
+        "src/general/*"
+      ],
+      "@validations/*": [
+        "src/validations/*"
+      ]
+    }
+  }
+}

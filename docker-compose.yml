@@ -1,0 +1,78 @@
+services:
+  # NestJS app service
+  nest-app:
+    container_name: nest-test
+    restart: unless-stopped
+    build:
+      context: ./nest-test
+      dockerfile: Dockerfile
+    ports:
+      - "7710:3000"
+    env_file:
+      - .env/.env.nest-test
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nest_core
+
+  # MySQL service
+  mysql:
+    image: mysql:8.1
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: nest_base1
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root_password
+    ports:
+      - "3308:3306"
+    volumes:
+      # - mysql_data:/var/lib/mysql
+      - .docker/db/data:/var/lib/mysql
+      - .docker/db/logs:/var/log/mysql
+      - .docker/db/config/my.cnf:/etc/mysql/conf.d/my.cnf
+      - .docker/db/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - nest_core
+
+  # Redis service
+  redis:
+    image: redis:6.2
+    container_name: redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - nest_core
+
+  # Nginx service
+#   nginx:
+#     restart: always
+#     image: nginx:alpine
+#     container_name: nginx
+#     volumes:
+#       - .docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf  # Mount file conf
+#       - .docker/nginx/static:/static
+#       - .docker/nginx/logs:/var/log/nginx
+#     ports:
+#       - "7713:80"  # Expose port 80
+#     depends_on:
+#       - nest-app
+#     networks:
+#       - nest_core
+
+# networks:
+#   nest_core:
+#     driver: bridge
