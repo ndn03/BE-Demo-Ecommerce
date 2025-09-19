@@ -25,7 +25,6 @@ import {
 } from './dto/update.user.dto';
 import { EOrderByUser } from './user.interface';
 import { QueryRunner, Repository } from 'typeorm';
-import { AsyncLocalStorageService } from 'src/common/context/async-local-storage.service';
 // import { EUserCustomStatus } from './user.interface';
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -33,7 +32,6 @@ export class UserService extends BaseService<User> {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly passwordService: PasswordService,
-    private readonly alsService: AsyncLocalStorageService,
 
     @InjectRepository(UserProfile)
     private readonly profileRepository: Repository<UserProfile>,
@@ -231,10 +229,6 @@ export class UserService extends BaseService<User> {
       user.password,
     );
     if (!isMatch) {
-      console.error(
-        'Current password is incorrect:',
-        changePasswordDto.currentPassword,
-      );
       throw new BadRequestException('Current password is incorrect');
     }
     if (changePasswordDto.currentPassword === changePasswordDto.newPassword) {

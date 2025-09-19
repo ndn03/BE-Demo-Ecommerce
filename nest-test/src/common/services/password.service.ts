@@ -6,4 +6,12 @@ export class PasswordService {
   comparePassword = (plainText: string, hash: string) =>
     bcrypt.compareSync(plainText, hash);
   generateRandomToken = () => uuidv4().toString();
+
+  generateRandomPassword(length = 7): string {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+    return Array.from({ length })
+      .map(() => chars.charAt(Math.floor(Math.random() * chars.length)))
+      .join('');
+  }
 }

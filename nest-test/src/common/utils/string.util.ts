@@ -94,3 +94,10 @@ export const createRandomCode = (length: number) => {
   const code = crypto.randomBytes(length).toString('hex');
   return code.slice(0, length);
 };
+export const safeParseInt = (
+  value: string | number,
+  defaultValue: number = 0,
+): number => {
+  const parsedValue = parseInt(value as string, 10);
+  return isNaN(parsedValue) ? defaultValue : parsedValue;
+};

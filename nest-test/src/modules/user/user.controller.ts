@@ -91,7 +91,7 @@ export class UserController {
   @Patch('change-password')
   @ApiOperation({ summary: 'Change user password' })
   @HttpCode(HttpStatus.OK)
-  @Auth(ERole.HUMAN_RESOURCES, ERole.ADMINISTRATOR)
+  @Auth(ERole.HUMAN_RESOURCES, ERole.ADMINISTRATOR, ERole.EMPLOYEE) // Chỉ cần là user đã đăng nhập
   async changePassword(
     @AuthUser() user: User,
     @Body() body: ChangePasswordDto,

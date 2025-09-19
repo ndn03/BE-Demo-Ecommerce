@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '../user/user.module';
 import { ContextMiddleware } from 'src/common/context/context.middleware';
+import { MailModule } from '../mail/mail.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserProfile]),
@@ -29,6 +30,7 @@ import { ContextMiddleware } from 'src/common/context/context.middleware';
     }),
     ConfigModule,
     forwardRef(() => UserModule),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, PasswordService, JwtAuthGuard, JwtStrategy],

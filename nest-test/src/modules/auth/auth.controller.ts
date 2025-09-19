@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Auth, AuthUser } from './auth.decorator';
 import { User } from 'src/entities/user.entity';
+import { ForgotPasswordDto } from '../auth/dto/forgot.password.user.dto';
 @ApiTags('Auth')
 @Controller('v1/user')
 export class AuthController {
@@ -62,6 +63,19 @@ export class AuthController {
   logout(@AuthUser() user: User) {
     return {
       message: `Logout successfully for user ${user.username}`,
+    };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Gửi mật khẩu mới tới email người dùng' })
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    const success = await this.authService.forgetPassword(body);
+    return {
+      message: success
+        ? 'Mật khẩu mới đã được gửi tới email của bạn'
+        : 'Không thể xử lý yêu cầu',
+      success,
     };
   }
 }
