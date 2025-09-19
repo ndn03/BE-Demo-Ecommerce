@@ -26,7 +26,7 @@ import { User } from 'src/entities/user.entity';
 import { QueryUserDto } from './dto/query.user.dto';
 import { CreateUserDto } from './dto/create.user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { ChangeEmailDto, ChangeEmailDtoForUser } from './dto/change-email.dto';
+import { AdminChangeEmailDto, changeMyEmailDto } from './dto/change-email.dto';
 import {
   UpdateUserHasProfileDto,
   CreateOrUpdateUserProfileDto,
@@ -103,24 +103,27 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Auth() // Chỉ cần là user đã đăng nhập
   @ApiOperation({ summary: 'Change my own email' })
-  async changeMyEmail(@AuthUser() user: User, @Body() body: ChangeEmailDto) {
-    return this.userService.changeEmailInternal(user.id, user, body);
+  async changeMyEmail(@AuthUser() user: User, @Body() body: changeMyEmailDto) {
+    const result = await this.userService.changeMyEmail(+user.id, user, body);
+    if (!result)
+      throw new BadRequestException('Failed to change email for user');
+    return { message: `Email changed successfully for user ${user.id}` };
   }
 
-  @Patch('change-email/user/:id')
-  @HttpCode(HttpStatus.OK)
-  @Auth(ERole.ADMINISTRATOR, ERole.HUMAN_RESOURCES) // Chỉ Admin & HR
-  @ApiOperation({ summary: '[Admin] Change email of a user' })
-  async ChangeEmailDtoForUser(
-    @Param('id', ParseIntPipe) id: number,
-    @AuthUser() executor: User,
-    @Body() body: ChangeEmailDtoForUser, // or ChangeEmailDto | ChangeEmailDtoForUser if needed
-  ) {
-    await this.userService.changeEmailInternal(id, executor, body);
-    return {
-      message: `Email for user with ID ${id} has been changed successfully`,
-    };
-  }
+  // @Patch('change-email/user/:id')
+  // @HttpCode(HttpStatus.OK)
+  // @Auth(ERole.ADMINISTRATOR, ERole.HUMAN_RESOURCES) // Chỉ Admin & HR
+  // @ApiOperation({ summary: '[Admin] Change email of a user' })
+  // async ChangeEmailDtoForUser(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @AuthUser() executor: User,
+  //   @Body() body: ChangeEmailDtoForUser, // or ChangeEmailDto | ChangeEmailDtoForUser if needed
+  // ) {
+  //   await this.userService.changeEmailInternal(id, executor, body);
+  //   return {
+  //     message: `Email for user with ID ${id} has been changed successfully`,
+  //   };
+  // }
 
   @Patch('update-user/:id')
   @ApiOperation({ summary: `[${ERole.ADMINISTRATOR}] Update user by id` })

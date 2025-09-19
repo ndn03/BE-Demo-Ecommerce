@@ -171,21 +171,23 @@ export class AuthService {
     const result = await this.userRepository.update(account.id, {
       password: hashedPassword,
     });
-    this.mailService.sendMailer({
-      to: account.email,
-      subject: 'BE-Ecomerce',
-      template: 'forgot-password',
-      context: {
-        username: account.username,
-        newPassword,
-        createdAt: new Date(),
-      },
-    }).catch((error) => {
-      console.error(
-        `Failed to send password reset email to ${account.email}:`,
-        error,
-      );
-    });
+    this.mailService
+      .sendMailer({
+        to: account.email,
+        subject: 'BE-Ecomerce',
+        template: 'forgot-password',
+        context: {
+          username: account.username,
+          newPassword,
+          createdAt: new Date(),
+        },
+      })
+      .catch((error) => {
+        console.error(
+          `Failed to send password reset email to ${account.email}:`,
+          error,
+        );
+      });
 
     return !!result.affected;
   }

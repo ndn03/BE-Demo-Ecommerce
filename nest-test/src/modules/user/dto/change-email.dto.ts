@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class ChangeEmailDto {
+export class AdminChangeEmailDto {
   @ApiProperty({ type: String, example: 'example@gmail.com', required: true })
   @IsNotEmpty()
   @IsString()
@@ -32,4 +32,22 @@ export class ChangeEmailDto {
   newEmail: string;
 }
 
-export class ChangeEmailDtoForUser extends ChangeEmailDto {}
+export class changeMyEmailDto {
+  @ApiProperty({ type: String, example: 'example@gmail.com', required: true })
+  @IsNotEmpty()
+  @IsString()
+  @Expose()
+  currentEmail: string;
+
+  @ApiProperty({ type: String, example: '123456', required: true })
+  @IsNotEmpty()
+  @IsString()
+  @Expose()
+  password: string;
+
+  @ApiProperty({ type: String, example: 'new@example.com', required: true })
+  @IsNotEmpty()
+  @IsString()
+  @Expose()
+  newEmail: string;
+}

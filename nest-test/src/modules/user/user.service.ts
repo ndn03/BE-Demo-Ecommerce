@@ -1,4 +1,4 @@
-import { ChangeEmailDto, ChangeEmailDtoForUser } from './dto/change-email.dto';
+import { AdminChangeEmailDto, changeMyEmailDto } from './dto/change-email.dto';
 import { CreateUserDto } from './dto/create.user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { validateDto } from 'src/common/utils/validation.util';
@@ -207,6 +207,53 @@ export class UserService extends BaseService<User> {
       total,
     };
   }
+  async changeMyEmail(
+    id: number,
+    user: User,
+    body: changeMyEmailDto,
+  ): Promise<User> {
+    // Validate ChangeEmailDto
+    const validatedDto = await validateDto(body, changeMyEmailDto);
+    // Find user by ID
+    const account = await this.findOne(id);
+    if (!account) {
+      throw new BadRequestException(`User with ID ${id} not found`);
+    }
+    if (!account.isActive) {
+      throw new UnauthorizedException('User account is locked');
+    }
+    if (account.email === validatedDto.newEmail) {
+      throw new BadRequestException(
+        'New email must be different from current email',
+      );
+    }
+    if (!body.password) {
+      throw new BadRequestException('Password is required to change email');
+    }
+    if (!body.newEmail || !body.currentEmail) {
+      throw new BadRequestException('New email and current email are required');
+    }
+
+    if (body.currentEmail !== account.email) {
+      throw new BadRequestException('Current email does not match');
+    }
+    // Check if new email is already in use
+    const existingUser = await this.findOneByEmail(validatedDto.newEmail);
+    if (existingUser && existingUser.id !== id) {
+      throw new BadRequestException('Email is already in use');
+    }
+    // Update email
+    const isCorrectPassword = this.passwordService.comparePassword(
+      body.password,
+      user.password,
+    );
+    if (!isCorrectPassword) {
+      throw new BadRequestException('Password is incorrect');
+    }
+    user.email = validatedDto.newEmail;
+    // Save the updated user
+    return this.userRepository.save(user);
+  }
 
   async changeMyPassword(
     id: number,
@@ -263,57 +310,6 @@ export class UserService extends BaseService<User> {
       editorId: user.editorId,
     });
     return !!result.affected;
-  }
-
-  async changeEmailInternal(
-    id: number,
-    user: User,
-    dto: ChangeEmailDto | ChangeEmailDtoForUser,
-  ): Promise<User> {
-    const account = await this.findOne(id, true);
-    const validatedDto = await validateDto(
-      dto,
-      dto instanceof ChangeEmailDto ? ChangeEmailDto : ChangeEmailDtoForUser,
-    );
-
-    if (!account) {
-      throw new BadRequestException(`User with ID ${id} not found`);
-    }
-
-    if (!account.isActive) {
-      throw new UnauthorizedException('User account is locked');
-    }
-
-    if (validatedDto.currentEmail !== account.email) {
-      throw new BadRequestException(
-        "Current email does not match the user's email",
-      );
-    }
-
-    if (validatedDto.newEmail === validatedDto.currentEmail) {
-      throw new BadRequestException(
-        'New email must be different from current email',
-      );
-    }
-
-    if (validatedDto.newEmail !== validatedDto.confirmEmail) {
-      throw new BadRequestException('New email and confirm email do not match');
-    }
-
-    const existingUser = await this.findOneByEmail(validatedDto.newEmail);
-    if (existingUser && existingUser.id !== id) {
-      throw new BadRequestException(
-        `Email ${validatedDto.newEmail} is already in use by another user`,
-      );
-    }
-
-    account.email = validatedDto.newEmail;
-    account.editorId = user.id;
-
-    const updatedUser = await this.userRepository.save(account);
-    delete updatedUser.password;
-
-    return updatedUser;
   }
 
   async updateUser(
