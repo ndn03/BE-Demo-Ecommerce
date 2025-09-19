@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,12 +19,17 @@ import { jwtConstants } from 'src/configs/auth.config';
 import { JwtService } from '@nestjs/jwt';
 import { EAccountType, EAccountStatus } from 'src/common/type.common';
 import { ERole, generateCode } from 'src/configs/role.config';
+import { ForgotPasswordDto } from '../auth/dto/forgot.password.user.dto';
+import { MailService } from '../mail/mail.service';
+import { MailModule } from '../mail/mail.module';
+
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly passwordService: PasswordService,
+    private readonly mailService: MailService,
     @InjectRepository(UserProfile)
     private readonly profileRepository: Repository<UserProfile>,
     private readonly userService: UserService,
@@ -148,6 +154,40 @@ export class AuthService {
     );
 
     return this.userService.findOne(savedUser.id);
+  }
+
+  async forgetPassword(body: ForgotPasswordDto): Promise<boolean> {
+    const { email } = body;
+    const account = await this.userService.findOneByEmail(email);
+    if (!account) {
+      throw new BadRequestException(`User with email ${email} not found`);
+    }
+    if (!account.isActive) {
+      throw new UnauthorizedException('User account is locked');
+    }
+    const newPassword = this.passwordService.generateRandomPassword(7);
+
+    const hashedPassword = this.passwordService.hashingPassword(newPassword);
+    const result = await this.userRepository.update(account.id, {
+      password: hashedPassword,
+    });
+    this.mailService.sendMailer({
+      to: account.email,
+      subject: 'BE-Ecomerce',
+      template: 'forgot-password',
+      context: {
+        username: account.username,
+        newPassword,
+        createdAt: new Date(),
+      },
+    }).catch((error) => {
+      console.error(
+        `Failed to send password reset email to ${account.email}:`,
+        error,
+      );
+    });
+
+    return !!result.affected;
   }
 
   logout(user: User): Promise<void> {

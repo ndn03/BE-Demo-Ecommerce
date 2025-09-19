@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Comparison } from 'src/common/decorators/comparison.decorator';
 import { Expose } from 'class-transformer';
 import {
+  IsEmail,
   IsNotEmpty,
   IsString,
   Matches,
