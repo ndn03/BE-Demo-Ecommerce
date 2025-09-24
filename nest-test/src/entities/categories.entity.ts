@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { PersonWithTrackingEntity } from '@src/common/entities/common';
 import { ProductsEntity } from './products.entity';
+import { VoucherEntity } from './voucher.entity';
 @Entity('categories')
 export class CategoryEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -27,4 +28,7 @@ export class CategoryEntity extends PersonWithTrackingEntity {
 
   @ManyToMany(() => ProductsEntity, (product) => product.categoryIds)
   product: ProductsEntity[];
+
+  @ManyToMany(() => VoucherEntity, (voucher) => voucher.categoriesIds, {})
+  vouchers: VoucherEntity[];
 }

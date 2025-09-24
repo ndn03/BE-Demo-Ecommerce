@@ -24,7 +24,9 @@ import {
   CreateOrUpdateUserProfileDto,
 } from './dto/update.user.dto';
 import { EOrderByUser } from './user.interface';
-import { QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
+import { uniqueArray } from '@src/common/utils/array.util';
+
 // import { EUserCustomStatus } from './user.interface';
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -375,5 +377,28 @@ export class UserService extends BaseService<User> {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async checkUsersCanInteract(userIds: number[]): Promise<boolean> {
+    // Implement the logic to check user interactions
+    if (!userIds || userIds.length === 0) return false;
+
+    // Remove duplicates from userIds
+    userIds = uniqueArray<number>(userIds);
+    // Fetch users from the database
+    if (userIds.length === 0) return false; // No user IDs provided
+
+    const users = await this.userRepository.find({
+      where: {
+        id: In(userIds),
+        isActive: true,
+        deletedAt: null,
+      },
+      relations: ['company'],
+    });
+
+    if (users.length !== userIds.length) return false; // Not all users found
+
+    return true; // All checks passed, users can interact
   }
 }

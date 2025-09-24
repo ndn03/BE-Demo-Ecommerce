@@ -181,4 +181,5 @@ export class BrandsController {
     await this.BrandsService.delete(+id);
     return { message: 'Brand hard removed successfully' };
   }
+
 }

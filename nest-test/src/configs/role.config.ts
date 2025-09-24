@@ -28,6 +28,27 @@ export const ROLE_LABELS = {
   [ERole.CUSTOMER_VIP3]: 'Khách hàng VIP 3',
 };
 
+export const ROLE_GROUPS = {
+  MANAGEMENT: [ERole.ADMINISTRATOR, ERole.HUMAN_RESOURCES],
+  CUSTOMERS: [
+    ERole.CUSTOMER,
+    ERole.CUSTOMER_VIP1,
+    ERole.CUSTOMER_VIP2,
+    ERole.CUSTOMER_VIP3,
+  ],
+  EMPLOYEES: [ERole.EMPLOYEE],
+  ALL: [
+    ERole.ADMINISTRATOR,
+    ERole.HUMAN_RESOURCES,
+    ERole.EMPLOYEE,
+    ERole.CUSTOMER,
+    ERole.CUSTOMER_VIP1,
+    ERole.CUSTOMER_VIP2,
+    ERole.CUSTOMER_VIP3,
+  ],
+  VIP: [ERole.CUSTOMER_VIP1, ERole.CUSTOMER_VIP2, ERole.CUSTOMER_VIP3],
+};
+
 const ERolePrefix: Record<ERole, string> = {
   [ERole.ADMINISTRATOR]: 'ADMIN',
   [ERole.HUMAN_RESOURCES]: 'HR',

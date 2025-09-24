@@ -22,6 +22,13 @@ export enum EStatusOrder {
   REFUNDED = 'REFUNDED', // Đã hoàn tiền
 }
 
+export enum EVoucherStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  DISABLED = 'DISABLED',
+  UPCOMING = 'UPCOMING',
+}
+
 export const EStatusOrderLabel: Record<EStatusOrder, string> = {
   [EStatusOrder.PENDING]: 'Đang chờ xử lý',
   [EStatusOrder.PROCESSING]: 'Đang xử lý',

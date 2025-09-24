@@ -12,6 +12,10 @@ import { BrandsEntity } from './brands.entity';
 import { CategoryEntity } from './categories.entity';
 import { ETypeDiscount, EStatusProduct } from 'src/common/type.common';
 import { SubImgProductEntity } from './sub-img-product.entity';
+import { OrderItemsEntity } from './order.items.entity';
+import { CartEntity } from './cart.entity';
+import { CartItemEntity } from './cart-item.entity';
+import { VoucherEntity } from './voucher.entity';
 @Entity('products')
 export class ProductsEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -40,19 +44,22 @@ export class ProductsEntity extends PersonWithTrackingEntity {
   typeDiscount: ETypeDiscount;
 
   @Column({ type: 'decimal', precision: 10, scale: 3 })
-  price_discount: number; // Price of the product after discount
+  final_price: number; // Price of the product after discount
 
   @Column({ type: 'enum', enum: EStatusProduct, nullable: true })
   status: EStatusProduct; // Status of the product (e.g., 'available', 'out of stock')
 
-  @Column({ type: 'varchar', nullable: true })
-  sku: string; // Stock Keeping Unit
+  // @Column({ type: 'varchar', nullable: true })
+  // sku: string; // Stock Keeping Unit
 
   @Column({ type: 'varchar', length: 191, nullable: true })
   image: string;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  soldCount: number;
 
   @OneToMany(() => SubImgProductEntity, (subImage) => subImage.product, {
     onDelete: 'CASCADE',
@@ -73,4 +80,13 @@ export class ProductsEntity extends PersonWithTrackingEntity {
   })
   @JoinTable()
   categoryIds: CategoryEntity[];
+
+  @OneToMany(() => OrderItemsEntity, (orderItem) => orderItem.product)
+  orderItems: OrderItemsEntity[];
+
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.product)
+  cartItems: CartItemEntity[];
+
+  @ManyToMany(() => VoucherEntity, (voucher) => voucher.productsIds, {})
+  vouchers: VoucherEntity[];
 }

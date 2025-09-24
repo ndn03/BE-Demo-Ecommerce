@@ -24,7 +24,7 @@ import { Queue } from 'bullmq';
 import { CategoryModule } from '@src/modules/category/category.module';
 import { BrandsModule } from 'src/modules/brand/brand.module';
 import { ProductModule } from 'src/modules/product/product.module';
-
+import { CartModule } from '@src/modules/cart/cart.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -67,6 +67,7 @@ import { ProductModule } from 'src/modules/product/product.module';
     CategoryModule,
     BrandsModule,
     ProductModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

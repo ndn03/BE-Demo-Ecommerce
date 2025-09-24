@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandsEntity } from 'src/entities/brands.entity';
 import { BaseService } from '@src/common/services/base.service';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { CreateBrandDto } from './dto/create.brand';
 import { User } from '@src/entities/user.entity';
 import { validateDto } from 'src/common/utils/validation.util';
@@ -352,5 +352,23 @@ export class BrandsService extends BaseService<BrandsEntity> {
 
       throw error;
     }
+  }
+
+  async checkBrandIds(brandIds: number[]): Promise<boolean> {
+    if (brandIds.length === 0) {
+      return false;
+    }
+    const brands = await this.brandRepository.find({
+      where: {
+        id: In(brandIds),
+        isActive: true,
+        deletedAt: null,
+      },
+      relations: ['product'],
+    });
+    if (brands.length !== brandIds.length) {
+      throw new NotFoundException('Một hoặc nhiều thương hiệu không tồn tại');
+    }
+    return true;
   }
 }

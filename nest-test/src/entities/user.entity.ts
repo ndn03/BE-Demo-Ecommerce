@@ -9,6 +9,7 @@ import {
   Column,
   Entity,
   Index,
+  ManyToMany,
   //   JoinColumn,
   //   ManyToMany,
   //   ManyToOne,
@@ -24,6 +25,9 @@ import {
 import { UserPasswordRecovery } from './user-password-recovery.entity';
 import { UserProfile } from './user-profile.entity';
 import { DocumentRecipient } from './documment-recipient.entity';
+import { OrdersEntity } from './order.entity';
+import { CartEntity } from './cart.entity';
+import { VoucherEntity } from './voucher.entity';
 @Entity('user')
 export class User extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -98,6 +102,17 @@ export class User extends PersonWithTrackingEntity {
     cascade: ['insert', 'remove'],
   })
   documentRecipients: DocumentRecipient[]; // Array of documents the user has received
+
+  @OneToMany(() => OrdersEntity, (order) => order.user, {
+    cascade: ['insert', 'remove'],
+  })
+  orders: OrdersEntity[];
+
+  @OneToOne(() => CartEntity, (cart) => cart.user, { cascade: true })
+  cart: CartEntity;
+
+  @ManyToMany(() => VoucherEntity, (voucher) => voucher.userIds, {})
+  vouchers: VoucherEntity[];
 
   // Decorators handle
   @Exclude()

@@ -1,6 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 import { PersonWithTrackingEntity } from 'src/common/entities/common';
 import { ProductsEntity } from './products.entity';
+import { VoucherEntity } from './voucher.entity';
 @Entity('brands')
 export class BrandsEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn() id: number;
@@ -30,4 +37,7 @@ export class BrandsEntity extends PersonWithTrackingEntity {
     eager: true,
   })
   products: ProductsEntity[];
+
+  @ManyToMany(() => VoucherEntity, (voucher) => voucher.brandsIds, {})
+  vouchers: VoucherEntity[];
 }

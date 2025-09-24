@@ -22,7 +22,11 @@ import { ERole, generateCode } from 'src/configs/role.config';
 import { ForgotPasswordDto } from '../auth/dto/forgot.password.user.dto';
 import { MailService } from '../mail/mail.service';
 import { MailModule } from '../mail/mail.module';
-
+import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import * as timezone from 'dayjs/plugin/timezone';
+import * as utc from 'dayjs/plugin/utc';
+import dayjs from 'dayjs';
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,6 +39,8 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
+
+  // date = dayjs(item.date);
 
   async validUserBeforeLogin(
     username: string,

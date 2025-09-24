@@ -64,7 +64,7 @@ export class QueryProductDto extends PartialType(
   @IsOptional()
   @IsNumber()
   @Expose()
-  price_discount?: number;
+  final_price?: number;
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()

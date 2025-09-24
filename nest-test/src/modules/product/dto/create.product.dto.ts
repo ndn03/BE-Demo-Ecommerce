@@ -86,7 +86,7 @@ export class CreateProductDto {
   @IsNumber()
   @Expose()
   @Transform(({ value }) => (value == null ? undefined : Number(value)))
-  price_discount?: number;
+  final_price?: number;
 
   @ApiPropertyOptional({
     type: Number,

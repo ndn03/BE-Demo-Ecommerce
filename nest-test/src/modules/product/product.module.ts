@@ -21,5 +21,6 @@ import { BrandsEntity } from 'src/entities/brands.entity';
   ],
   providers: [ProductService, CategoriesService, BrandsService],
   controllers: [ProductController],
+  exports: [ProductService, TypeOrmModule],
 })
 export class ProductModule {}

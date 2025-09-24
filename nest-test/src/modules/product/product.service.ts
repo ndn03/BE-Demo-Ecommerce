@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductsEntity } from '../../entities/products.entity';
 import { BaseService } from '@src/common/services/base.service';
-import { Brackets, Repository, QueryRunner } from 'typeorm';
+import { Brackets, Repository, QueryRunner, In } from 'typeorm';
 import { MediaService } from '../upload/media.service';
 import { checkDuplicateByField } from 'src/common/context/helper/check-field-duplicate';
 import { CreateProductDto } from './dto/create.product.dto';
@@ -156,7 +156,7 @@ export class ProductService extends BaseService<ProductsEntity> {
         categoryIds: categoryIds.map((id) => ({ id })),
         image: imageUrl,
         isActive: true,
-        price_discount: priceAfterDiscount,
+        final_price: priceAfterDiscount,
         creatorId: user.id,
         brand: { id: validate.brand },
       });
@@ -228,7 +228,7 @@ export class ProductService extends BaseService<ProductsEntity> {
       price,
       status,
       stock,
-      price_discount,
+      final_price,
       typeDiscount,
       isActive,
       from,
@@ -278,9 +278,9 @@ export class ProductService extends BaseService<ProductsEntity> {
     if (typeof price !== 'undefined') {
       qb.andWhere('product.price = :price', { price });
     }
-    if (typeof price_discount !== 'undefined') {
-      qb.andWhere('product.price_discount = :price_discount', {
-        price_discount,
+    if (typeof final_price !== 'undefined') {
+      qb.andWhere('product.final_price = :final_price', {
+        final_price,
       });
     }
     if (typeof typeDiscount !== 'undefined') {
@@ -304,24 +304,24 @@ export class ProductService extends BaseService<ProductsEntity> {
     }
     if (from || to) {
       if (from) {
-        qb.andWhere('product.price_discount >= :from', {
+        qb.andWhere('product.final_price >= :from', {
           from: dayjs(from).startOf('day').toDate(),
         });
       }
       if (to) {
-        qb.andWhere('product.price_discount <= :to', {
+        qb.andWhere('product.final_price <= :to', {
           to: dayjs(to).endOf('day').toDate(),
         });
       }
     }
     if (priceRangeFrom || priceRangeTo) {
       if (priceRangeFrom) {
-        qb.andWhere('product.price_discount >= :priceRangeFrom', {
+        qb.andWhere('product.final_price >= :priceRangeFrom', {
           priceRangeFrom,
         });
       }
       if (priceRangeTo) {
-        qb.andWhere('product.price_discount <= :priceRangeTo', {
+        qb.andWhere('product.final_price <= :priceRangeTo', {
           priceRangeTo,
         });
       }
@@ -439,7 +439,7 @@ export class ProductService extends BaseService<ProductsEntity> {
     }
 
     // Tính giá sau giảm giá (nếu có thay đổi)
-    let priceAfterDiscount = product.price_discount;
+    let priceAfterDiscount = product.final_price;
     if (validate.price || validate.discount || validate.typeDiscount) {
       priceAfterDiscount = this.discountPrice(
         validate.price ?? product.price,
@@ -554,7 +554,7 @@ export class ProductService extends BaseService<ProductsEntity> {
         categoryIds: categoryIds.map((id) => ({ id })),
         image: imageUrl,
         isActive: product.isActive != null ? !!product.isActive : undefined,
-        price_discount: priceAfterDiscount,
+        final_price: priceAfterDiscount,
         brand: { id: brandId },
         editorId: user.id,
       });
@@ -611,5 +611,22 @@ export class ProductService extends BaseService<ProductsEntity> {
       // Giải phóng queryRunner
       await queryRunner.release();
     }
+  }
+
+  async checkProductIds(productIds: number[]): Promise<boolean> {
+    if (productIds.length === 0) {
+      return false;
+    }
+    const products = await this.productRepository.find({
+      where: {
+        id: In(productIds),
+        isActive: true,
+        deletedAt: null,
+      },
+    });
+    if (products.length !== productIds.length) {
+      throw new NotFoundException('Một hoặc nhiều sản phẩm không tồn tại');
+    }
+    return true;
   }
 }
