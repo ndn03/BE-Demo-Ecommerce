@@ -25,7 +25,7 @@ import { ContextMiddleware } from 'src/common/context/context.middleware';
   ],
   controllers: [UserController],
   providers: [UserService, PasswordService],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -7,9 +7,10 @@ import {
   Min,
   IsEnum,
   IsArray,
+  IsDate,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { ETypeDiscount, EVoucherStatus } from '@src/common/type.common';
 import { ERole, ROLE_GROUPS } from '@src/configs/role.config';
 import { ALLOWED_VOUCHER_DISCOUNTS } from '../voucher.interface';
@@ -20,6 +21,7 @@ export class CreateVoucherDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Type(() => String)
   @MaxLength(100)
   @Expose()
   code: string;
@@ -29,6 +31,7 @@ export class CreateVoucherDto {
   })
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   @Min(0)
   @Expose()
   discount: number;
@@ -43,21 +46,23 @@ export class CreateVoucherDto {
 
   @ApiProperty({
     type: String,
-    enum: ALLOWED_VOUCHER_DISCOUNTS,
+    enum: ETypeDiscount,
     example: ETypeDiscount.PERCENTAGE,
+    description: 'Loại giảm giá: PERCENTAGE, AMOUNT, NO_DISCOUNT',
   })
-  @IsNotEmpty()
-  @IsEnum(ALLOWED_VOUCHER_DISCOUNTS, { message: 'Loại giảm giá không hợp lệ' })
-  type: ETypeDiscount;
-
-  @ApiProperty({
-    type: String,
+  @IsNotEmpty({ message: 'discount_type should not be empty' })
+  @IsEnum(ETypeDiscount, {
+    message:
+      'discount_type must be one of the following values: PERCENTAGE, AMOUNT, NO_DISCOUNT',
   })
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(100)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toUpperCase().trim();
+    }
+    return value;
+  })
   @Expose()
-  productId: string;
+  discount_type: ETypeDiscount;
 
   @ApiProperty({
     description: 'Danh sách role có thể sử dụng voucher',
@@ -76,7 +81,7 @@ export class CreateVoucherDto {
         .filter(Boolean);
     }
 
-    // 2Nếu gửi dạng mảng: ['CUSTOMER', 'CUSTOMER_VIP1'] → giữ nguyên
+    //Nếu gửi dạng mảng: ['CUSTOMER', 'CUSTOMER_VIP1'] → giữ nguyên
     if (Array.isArray(value)) {
       return value;
     }
@@ -122,8 +127,8 @@ export class CreateVoucherDto {
     type: Date,
   })
   @IsNotEmpty()
-  @IsString()
-  @MaxLength(100)
+  @IsDate()
+  @Type(() => Date)
   @Expose()
   startDate: Date;
 
@@ -131,8 +136,8 @@ export class CreateVoucherDto {
     type: Date,
   })
   @IsNotEmpty()
-  @IsString()
-  @MaxLength(100)
+  @IsDate()
+  @Type(() => Date)
   @Expose()
   expirationDate: Date;
 
@@ -159,6 +164,28 @@ export class CreateVoucherDto {
   usage_limit?: number | null;
 
   @ApiPropertyOptional({
+    type: Number,
+    description: 'Số lần đã được sử dụng',
+    example: 100,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Expose()
+  used_count?: number | null;
+
+  @ApiPropertyOptional({
+    type: Number,
+    description: 'Giới hạn số lần sử dụng cho mỗi người dùng',
+    example: 100,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Expose()
+  per_user_limit?: number | null;
+
+  @ApiPropertyOptional({
     type: String,
     enum: EVoucherStatus,
     default: EVoucherStatus.ACTIVE,
@@ -173,7 +200,7 @@ export class CreateVoucherDto {
   @ApiPropertyOptional({
     type: [Number],
     description: 'Danh sách ID thương hiệu áp dụng voucher',
-    example: [1, 2, 3],
+    example: [1, 4, 5],
     required: false,
   })
   @IsOptional()

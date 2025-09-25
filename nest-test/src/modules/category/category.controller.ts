@@ -23,7 +23,6 @@ import { QueryCategoryDto } from './dto/query.category';
 import { UpdateCategoryDto } from './dto/update.category';
 @ApiTags('category')
 @Controller('v1/categories')
-@Controller('rest/categories')
 export class CategoriesController {
   constructor(private service: CategoriesService) {}
 

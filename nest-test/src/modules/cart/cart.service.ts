@@ -84,6 +84,22 @@ export class CartService {
       await this.cartRepository.save(cart);
     }
 
+    // let price = cart.totalPrice;
+    // if (body.discount_type) {
+    //   if (body.discount_type == ETypeDiscount.PERCENTAGE) {
+    //     if (body.discount > 100 || body.discount <= 0) {
+    //       throw new BadRequestException('Giá trị giảm giá không hợp lệ');
+    //     }
+    //     price = price - (price * body.discount) / 100;
+    //   }
+    //   if (body.discount_type == ETypeDiscount.AMOUNT) {
+    //     if (body.discount <= 0) {
+    //       throw new BadRequestException('Giá trị giảm giá không hợp lệ');
+    //     }
+    //     price = price - body.discount;
+    //   }
+    // }
+
     // Tính tổng giá trị giỏ hàng
     const totalPrice =
       cart.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ||

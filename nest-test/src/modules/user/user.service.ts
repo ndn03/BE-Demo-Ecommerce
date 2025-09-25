@@ -394,7 +394,6 @@ export class UserService extends BaseService<User> {
         isActive: true,
         deletedAt: null,
       },
-      relations: ['company'],
     });
 
     if (users.length !== userIds.length) return false; // Not all users found

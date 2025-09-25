@@ -25,6 +25,7 @@ import { CategoryModule } from '@src/modules/category/category.module';
 import { BrandsModule } from 'src/modules/brand/brand.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { CartModule } from '@src/modules/cart/cart.module';
+import { VoucherModule } from './modules/voucher/voucher.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -68,6 +69,7 @@ import { CartModule } from '@src/modules/cart/cart.module';
     BrandsModule,
     ProductModule,
     CartModule,
+    VoucherModule,
   ],
   controllers: [AppController],
   providers: [

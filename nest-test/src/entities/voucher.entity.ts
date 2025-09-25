@@ -13,13 +13,13 @@ import { ProductsEntity } from './products.entity';
 import { CategoryEntity } from './categories.entity';
 import { BrandsEntity } from './brands.entity';
 import { User } from './user.entity';
-import { ETypeDiscount, EVoucherStatus} from '@src/common/type.common';
+import { ETypeDiscount, EVoucherStatus } from '@src/common/type.common';
 @Entity('vouchers')
 export class VoucherEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 100, unique: true })
   code: string;
 
   @Column({ type: 'decimal', precision: 5, scale: 3, default: 0 })
@@ -30,15 +30,15 @@ export class VoucherEntity extends PersonWithTrackingEntity {
     enum: ETypeDiscount,
   })
   discount_type: ETypeDiscount;
-  
+
   @Column({ type: 'timestamp', nullable: false })
   startDate: Date;
 
   @Column({ type: 'timestamp', nullable: false })
   expirationDate: Date;
 
-  @Column()
-  description: string;
+  @Column({ type: 'text', nullable: true })
+  description: string; // Description of the product
 
   @Column({ type: 'simple-array', nullable: true })
   applicableRoles: ERole[];

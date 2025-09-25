@@ -364,7 +364,6 @@ export class BrandsService extends BaseService<BrandsEntity> {
         isActive: true,
         deletedAt: null,
       },
-      relations: ['product'],
     });
     if (brands.length !== brandIds.length) {
       throw new NotFoundException('Một hoặc nhiều thương hiệu không tồn tại');
