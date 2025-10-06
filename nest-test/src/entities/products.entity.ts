@@ -16,6 +16,7 @@ import { OrderItemsEntity } from './order.items.entity';
 import { CartEntity } from './cart.entity';
 import { CartItemEntity } from './cart-item.entity';
 import { VoucherEntity } from './voucher.entity';
+import { VoucherProductEntity } from './voucher.products.entity';
 @Entity('products')
 export class ProductsEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -87,6 +88,8 @@ export class ProductsEntity extends PersonWithTrackingEntity {
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.product)
   cartItems: CartItemEntity[];
 
-  @ManyToMany(() => VoucherEntity, (voucher) => voucher.productsIds, {})
-  vouchers: VoucherEntity[];
+  @OneToMany(() => VoucherProductEntity, (n) => n.product, {
+    cascade: ['insert', 'remove'],
+  })
+  voucherProducts: VoucherProductEntity[];
 }

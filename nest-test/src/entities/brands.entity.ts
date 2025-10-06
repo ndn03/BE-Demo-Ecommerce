@@ -37,7 +37,4 @@ export class BrandsEntity extends PersonWithTrackingEntity {
     eager: true,
   })
   products: ProductsEntity[];
-
-  @ManyToMany(() => VoucherEntity, (voucher) => voucher.brandsIds, {})
-  vouchers: VoucherEntity[];
 }

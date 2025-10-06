@@ -29,6 +29,4 @@ export class CategoryEntity extends PersonWithTrackingEntity {
   @ManyToMany(() => ProductsEntity, (product) => product.categoryIds)
   product: ProductsEntity[];
 
-  @ManyToMany(() => VoucherEntity, (voucher) => voucher.categoriesIds, {})
-  vouchers: VoucherEntity[];
 }

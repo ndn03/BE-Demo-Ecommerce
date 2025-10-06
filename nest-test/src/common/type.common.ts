@@ -164,8 +164,17 @@ export enum ETargetReceiverGroup {
   ALL = 0,
   HUMAN_RESOURCES = 1,
   EMPLOYEE = 2,
+  CUSTOMER = 3,
+  ALL_CUSTOMER = 4,
+  CUSTOMER_VIP = 5,
 }
 
+export enum EtargetType {
+  ALL = '0',
+  BRAND = '1',
+  CATEGORY = '2',
+  PRODUCT = '3',
+}
 export const CHUNK_SIZE = 100; // Kích thước chunk tối đa cho các thao tác phân mảnh
 
 // Số năm tối đa cho các khoảng thời gian

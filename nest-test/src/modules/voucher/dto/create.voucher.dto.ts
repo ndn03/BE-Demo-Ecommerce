@@ -8,23 +8,45 @@ import {
   IsEnum,
   IsArray,
   IsDate,
+  ValidateIf,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
-import { ETypeDiscount, EVoucherStatus } from '@src/common/type.common';
-import { ERole, ROLE_GROUPS } from '@src/configs/role.config';
-import { ALLOWED_VOUCHER_DISCOUNTS } from '../voucher.interface';
+import {
+  ETargetReceiverGroup,
+  EtargetType,
+  ETypeDiscount,
+  EVoucherStatus,
+} from '@src/common/type.common';
+import { Comparison } from '@src/common/decorators/comparison.decorator';
 
 export class CreateVoucherDto {
   @ApiProperty({
     type: String,
+    description: 'Mã voucher duy nhất',
+    example: 'SUMMER2024',
+    maxLength: 100,
   })
   @IsNotEmpty()
   @IsString()
   @Type(() => String)
-  @MaxLength(100)
+  @MaxLength(100) // Phù hợp với entity varchar(100)
   @Expose()
   code: string;
+
+  @ApiPropertyOptional({
+    type: Number,
+    description:
+      'ID của campaign chứa voucher này (tùy chọn - tính năng chưa được triển khai)',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Expose()
+  campaignId?: number;
 
   @ApiProperty({
     type: Number,
@@ -34,13 +56,14 @@ export class CreateVoucherDto {
   @Type(() => Number)
   @Min(0)
   @Expose()
-  discount: number;
+  value_discount: number;
 
   @ApiPropertyOptional({
     type: String,
   })
   @IsOptional()
   @IsString()
+  @Type(() => String)
   @MaxLength(255)
   description?: string;
 
@@ -48,12 +71,12 @@ export class CreateVoucherDto {
     type: String,
     enum: ETypeDiscount,
     example: ETypeDiscount.PERCENTAGE,
-    description: 'Loại giảm giá: PERCENTAGE, AMOUNT, NO_DISCOUNT',
+    description: 'Loại giảm giá: PERCENTAGE, AMOUNT',
   })
   @IsNotEmpty({ message: 'discount_type should not be empty' })
   @IsEnum(ETypeDiscount, {
     message:
-      'discount_type must be one of the following values: PERCENTAGE, AMOUNT, NO_DISCOUNT',
+      'discount_type must be one of the following values: PERCENTAGE, AMOUNT',
   })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
@@ -64,82 +87,66 @@ export class CreateVoucherDto {
   @Expose()
   discount_type: ETypeDiscount;
 
-  @ApiProperty({
-    description: 'Danh sách role có thể sử dụng voucher',
-    example: [ERole.CUSTOMER, ERole.CUSTOMER_VIP1],
-    required: false,
-  })
-  @IsOptional() // cho phép bỏ trống → hiểu là áp dụng cho tất cả
-  @IsArray()
-  @IsEnum(ERole, { each: true })
-  @Transform(({ value }) => {
-    // Nếu frontend gửi dạng chuỗi: "CUSTOMER, CUSTOMER_VIP1"
-    if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((role: string) => role.trim())
-        .filter(Boolean);
-    }
-
-    //Nếu gửi dạng mảng: ['CUSTOMER', 'CUSTOMER_VIP1'] → giữ nguyên
-    if (Array.isArray(value)) {
-      return value;
-    }
-
-    // 3️⃣ Nếu không gửi gì → hiểu là ALL
-    return null;
-  })
-  @Expose()
-  applicableRoles: ERole[] | null;
-
+  @ValidateIf((o) => !o.receiverIds || o.receiverIds.length === 0)
+  @Type(() => Number)
+  @IsEnum(ETargetReceiverGroup)
   @ApiPropertyOptional({
-    type: [Number],
-    description: 'Danh sách ID thương hiệu áp dụng voucher',
-    example: [1, 2, 3],
-    required: false,
+    example: ETargetReceiverGroup.HUMAN_RESOURCES,
+    enum: ETargetReceiverGroup,
+    description: 'Receiver group (0: ALL, 1: HR, 2: EMPLOYEE)',
   })
-  @IsOptional()
+  @Expose()
+  targetReceiverGroup?: ETargetReceiverGroup;
+
+  @ValidateIf((o) => o.targetReceiverGroup === undefined)
   @IsArray()
-  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  @IsInt({ each: true, message: 'ID người nhận phải là một mảng số nguyên' })
+  @ApiPropertyOptional({
+    description: 'List of receiver IDs',
+    example: [36, 37, 38],
+  })
   @Expose()
+  receiverIds?: number[];
+
+  @ApiProperty({
+    type: String,
+    enum: EtargetType,
+    example: EtargetType.ALL,
+    description: 'Loại target sản phẩm: ALL, BRAND, CATEGORY, PRODUCT',
+  })
+  @IsNotEmpty({ message: 'targetType should not be empty' })
+  @IsEnum(EtargetType, {
+    message: 'targetType must be one of: ALL, BRAND, CATEGORY, PRODUCT',
+  })
   @Transform(({ value }) => {
-    // Nếu frontend gửi dạng chuỗi: "1, 2, 3"
     if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((id: string) => Number(id.trim()))
-        .filter(Boolean);
+      return value.toUpperCase().trim();
     }
-
-    // Nếu gửi dạng mảng: [1, 2, 3] → giữ nguyên
-    if (Array.isArray(value)) {
-      return value;
-    }
-
-    // Nếu không gửi gì → hiểu là ALL
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
+    return value;
   })
-  userIds?: number[];
+  @Expose()
+  targetType: EtargetType;
 
   @ApiProperty({
     type: Date,
+    description: 'Thời gian bắt đầu hiệu lực',
   })
   @IsNotEmpty()
   @IsDate()
   @Type(() => Date)
   @Expose()
-  startDate: Date;
+  validFrom: Date;
 
   @ApiProperty({
     type: Date,
+    description: 'Thời gian hết hạn',
   })
   @IsNotEmpty()
   @IsDate()
   @Type(() => Date)
   @Expose()
-  expirationDate: Date;
+  validTo: Date;
 
   @ApiPropertyOptional({
     type: Number,
@@ -154,6 +161,17 @@ export class CreateVoucherDto {
 
   @ApiPropertyOptional({
     type: Number,
+    description: 'Giá trị đơn hàng tối đa để áp dụng voucher',
+    example: 100000,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Expose()
+  max_discount_value?: number | null;
+
+  @ApiPropertyOptional({
+    type: Number,
     description: 'Giới hạn số lần sử dụng',
     example: 100,
   })
@@ -165,25 +183,27 @@ export class CreateVoucherDto {
 
   @ApiPropertyOptional({
     type: Number,
-    description: 'Số lần đã được sử dụng',
-    example: 100,
+    description: 'Số lần đã được sử dụng (mặc định: 0)',
+    example: 0,
+    default: 0,
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(0)
   @Expose()
-  used_count?: number | null;
+  used_count?: number;
 
   @ApiPropertyOptional({
     type: Number,
-    description: 'Giới hạn số lần sử dụng cho mỗi người dùng',
-    example: 100,
+    description: 'Giới hạn số lần sử dụng cho mỗi người dùng (mặc định: 1)',
+    example: 1,
+    default: 1,
   })
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Expose()
-  per_user_limit?: number | null;
+  per_user_limit?: number;
 
   @ApiPropertyOptional({
     type: String,
@@ -198,66 +218,40 @@ export class CreateVoucherDto {
   status?: EVoucherStatus;
 
   @ApiPropertyOptional({
-    type: [Number],
-    description: 'Danh sách ID thương hiệu áp dụng voucher',
-    example: [1, 4, 5],
-    required: false,
+    type: Boolean,
+    description: 'Trạng thái kích hoạt voucher',
+    default: true,
   })
   @IsOptional()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @Expose()
   @Transform(({ value }) => {
-    // Nếu frontend gửi dạng chuỗi: "1, 2, 3"
     if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((id: string) => Number(id.trim()))
-        .filter(Boolean);
+      return value === 'true' || value === '1';
     }
-
-    // Nếu gửi dạng mảng: [1, 2, 3] → giữ nguyên
-    if (Array.isArray(value)) {
-      return value;
+    if (typeof value === 'number') {
+      return value === 1;
     }
-
-    // Nếu không gửi gì → hiểu là ALL
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
+    return Boolean(value);
   })
-  brandsIds?: number[];
+  @Expose()
+  isActive?: boolean;
 
   @ApiPropertyOptional({
-    type: [Number],
-    description: 'Danh sách ID danh mục áp dụng voucher',
-    example: [1, 2, 3],
-    required: false,
+    type: Boolean,
+    description: 'Voucher công khai (người dùng có thể tự claim)',
+    default: false,
   })
   @IsOptional()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @Expose()
   @Transform(({ value }) => {
-    // Nếu frontend gửi dạng chuỗi: "1, 2, 3"
     if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((id: string) => Number(id.trim()))
-        .filter(Boolean);
+      return value === 'true' || value === '1';
     }
-
-    // Nếu gửi dạng mảng: [1, 2, 3] → giữ nguyên
-    if (Array.isArray(value)) {
-      return value;
+    if (typeof value === 'number') {
+      return value === 1;
     }
-
-    // Nếu không gửi gì → hiểu là ALL
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
+    return Boolean(value);
   })
-  categoriesIds?: number[];
+  @Expose()
+  isPublic?: boolean;
 
   @ApiPropertyOptional({
     type: [Number],
@@ -282,12 +276,11 @@ export class CreateVoucherDto {
     if (Array.isArray(value)) {
       return value;
     }
-
     // Nếu không gửi gì → hiểu là ALL
     if (value === undefined || value === null || value === '') {
       return null;
     }
   })
   @Expose()
-  productsIds?: number[];
+  voucher_productIds?: number[];
 }

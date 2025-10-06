@@ -1,19 +1,24 @@
 import {
   Column,
   Entity,
-  JoinTable,
+  JoinColumn,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PersonWithTrackingEntity } from 'src/common/entities/common';
 import { CartEntity } from './cart.entity';
-import { ERole, ROLE_GROUPS } from '@src/configs/role.config';
-import { ProductsEntity } from './products.entity';
-import { CategoryEntity } from './categories.entity';
-import { BrandsEntity } from './brands.entity';
-import { User } from './user.entity';
-import { ETypeDiscount, EVoucherStatus } from '@src/common/type.common';
+import { VoucherProductEntity } from './voucher.products.entity';
+import {
+  ETargetReceiverGroup,
+  EtargetType,
+  ETypeDiscount,
+  EVoucherStatus,
+} from '@src/common/type.common';
+import { VoucherRecipient } from './voucher.user.entity';
+import { VoucherHistory } from './voucher.history.entity';
+import { VoucherCampaign } from './voucher.campaign.entity';
 @Entity('vouchers')
 export class VoucherEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -22,8 +27,18 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   @Column({ type: 'varchar', length: 100, unique: true })
   code: string;
 
+  @Column({ type: 'int', nullable: true })
+  campaignId: number; // ID của campaign chứa voucher này
+
+  @ManyToOne(() => VoucherCampaign, (campaign) => campaign.vouchers, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'campaignId' })
+  campaign: VoucherCampaign; // Mối quan hệ với campaign
+
   @Column({ type: 'decimal', precision: 5, scale: 3, default: 0 })
-  discount: number;
+  value_discount: number;
 
   @Column({
     type: 'enum',
@@ -31,59 +46,32 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   })
   discount_type: ETypeDiscount;
 
-  @Column({ type: 'timestamp', nullable: false })
-  startDate: Date;
-
-  @Column({ type: 'timestamp', nullable: false })
-  expirationDate: Date;
-
   @Column({ type: 'text', nullable: true })
   description: string; // Description of the product
 
-  @Column({ type: 'simple-array', nullable: true })
-  applicableRoles: ERole[];
+  @Column({
+    type: 'enum',
+    enum: ETargetReceiverGroup,
+    default: ETargetReceiverGroup.ALL_CUSTOMER,
+  })
+  targetReceiverGroup: ETargetReceiverGroup;
 
-  @ManyToMany(() => BrandsEntity, (brands) => brands.vouchers, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'voucher_brands',
-    joinColumn: { name: 'voucher_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'brand_id', referencedColumnName: 'id' },
-  })
-  brandsIds: BrandsEntity[];
+  // NOTE: receiverIds và voucher_productIds đã được thay thế bằng relationship tables
+  // Sử dụng VoucherRecipient và VoucherProductEntity thay thế
+  // @Column({ type: 'json', nullable: true })
+  // receiverIds: number[]; // list id receivers
 
-  @ManyToMany(() => CategoryEntity, (category) => category.vouchers, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'voucher_categories',
-    joinColumn: { name: 'voucher_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
-  })
-  categoriesIds: CategoryEntity[];
+  @Column({ type: 'enum', enum: EtargetType })
+  targetType: EtargetType;
 
-  @ManyToMany(() => ProductsEntity, (product) => product.vouchers, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'voucher_products',
-    joinColumn: { name: 'voucher_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' },
-  })
-  productsIds: ProductsEntity[];
+  // @Column({ type: 'json', nullable: true })
+  // voucher_productIds: number[]; // list id products
 
-  @ManyToMany(() => ProductsEntity, (product) => product.vouchers, {
-    cascade: true,
-  })
-  @JoinTable({
-    name: 'voucher_users',
-    joinColumn: { name: 'voucher_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
-  })
-  userIds: User[];
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   min_order_value: number | null; // Giá trị đơn hàng tối thiểu để áp dụng voucher
+
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  max_discount_value: number | null; // Giá trị giảm giá tối đa
 
   @Column({ type: 'int', nullable: true }) // Giới hạn số lần sử dụng
   usage_limit: number | null;
@@ -104,6 +92,30 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   })
   status: EVoucherStatus;
 
+  @Column({ type: 'timestamp', nullable: true })
+  validFrom: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  validTo: Date;
+
   @OneToMany(() => CartEntity, (cart) => cart.voucher)
   cart: CartEntity[];
+
+  @OneToMany(() => VoucherRecipient, (recipient) => recipient.voucher, {
+    cascade: ['insert', 'remove'],
+  })
+  voucherRecipients: VoucherRecipient[];
+
+  @Column({ type: 'boolean', default: false })
+  isPublic: boolean;
+
+  @OneToMany(() => VoucherHistory, (history) => history.voucher, {
+    lazy: true,
+  })
+  sendHistories: Promise<VoucherHistory[]>;
+
+  @OneToMany(() => VoucherProductEntity, (vp) => vp.voucher, {
+    cascade: true,
+  })
+  voucherProducts: VoucherProductEntity[];
 }

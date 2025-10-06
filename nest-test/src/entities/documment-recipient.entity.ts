@@ -10,6 +10,13 @@ import {
 import { Notification } from './notification.entity';
 import { User } from './user.entity';
 
+export enum ERecipientStatus {
+  SENT = 'sent',
+  DELIVERED = 'delivered',
+  READ = 'read',
+  FAILED = 'failed',
+}
+
 @Entity('document-recipient')
 export class DocumentRecipient {
   @PrimaryGeneratedColumn()
@@ -33,6 +40,13 @@ export class DocumentRecipient {
   })
   @JoinColumn({ name: 'userId' })
   user: User; // User entity representing the recipient of the notification
+
+  @Column({
+    type: 'enum',
+    enum: ERecipientStatus,
+    default: ERecipientStatus.SENT,
+  })
+  status: ERecipientStatus; // Trạng thái của người nhận thông báo
 
   @Index()
   @Column({ type: 'timestamp', nullable: true, default: null })

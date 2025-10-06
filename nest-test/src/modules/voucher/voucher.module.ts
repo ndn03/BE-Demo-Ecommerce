@@ -16,6 +16,8 @@ import { BrandsEntity } from 'src/entities/brands.entity';
 import { CategoryEntity } from 'src/entities/categories.entity';
 import { ProductsEntity } from 'src/entities/products.entity';
 import { User } from 'src/entities/user.entity';
+import { VoucherRecipient } from 'src/entities/voucher.user.entity';
+import { VoucherProductEntity } from 'src/entities/voucher.products.entity';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { User } from 'src/entities/user.entity';
       CategoryEntity,
       ProductsEntity,
       User,
+      VoucherRecipient,
+      VoucherProductEntity,
     ]),
     ProductModule,
     BrandsModule,

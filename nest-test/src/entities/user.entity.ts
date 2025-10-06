@@ -28,6 +28,7 @@ import { DocumentRecipient } from './documment-recipient.entity';
 import { OrdersEntity } from './order.entity';
 import { CartEntity } from './cart.entity';
 import { VoucherEntity } from './voucher.entity';
+import { VoucherRecipient } from './voucher.user.entity';
 @Entity('user')
 export class User extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -111,13 +112,15 @@ export class User extends PersonWithTrackingEntity {
   @OneToOne(() => CartEntity, (cart) => cart.user, { cascade: true })
   cart: CartEntity;
 
-  @ManyToMany(() => VoucherEntity, (voucher) => voucher.userIds, {})
-  vouchers: VoucherEntity[];
+  @OneToMany(() => VoucherRecipient, (n) => n.user, {
+    cascade: ['insert', 'remove'],
+  })
+  voucherRecipients: VoucherRecipient[];
 
   // Decorators handle
   @Exclude()
-  load(u: Partial<User>) {
-    Object.assign(this, u);
+  load(user: Partial<User>) {
+    Object.assign(this, user);
   }
 
   @BeforeInsert()
