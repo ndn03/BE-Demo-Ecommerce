@@ -144,7 +144,7 @@ export class ProductService extends BaseService<ProductsEntity> {
         rollbackFileIds.push(...subImgFileIds);
 
         subImageEntities = subImagesData.map((url) => {
-          const sub = new SubImgProductEntity();
+          const sub = this.subImgProductRepository.create();
           sub.url = url;
           return sub;
         });

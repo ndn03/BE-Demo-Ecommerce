@@ -43,7 +43,7 @@ export class CartController {
   @ApiOperation({ summary: 'Delete item from cart' })
   @HttpCode(HttpStatus.OK)
   async deleteCartItem(@AuthUser() user: User, @Param('id') itemId: number) {
-    const result = await this.service.deleteCartItem(user, itemId);
+    const result = await this.service.removeFromCart(user, itemId);
     return { message: 'Delete item from cart successfully', data: result };
   }
 
@@ -56,12 +56,47 @@ export class CartController {
     return { message: 'Clear cart successfully', data: result };
   }
 
-  @Patch('item/:id')
+  @Patch('item')
   @Auth()
   @ApiOperation({ summary: 'Update cart item quantity' })
   @HttpCode(HttpStatus.OK)
   async updateCartItem(@AuthUser() user: User, @Body() body: UpdateCartDto) {
     const result = await this.service.updateCartItem(user, body);
     return { message: 'Update cart item successfully', data: result };
+  }
+
+  @Post('voucher/:voucherCode')
+  @Auth()
+  @ApiOperation({ summary: 'Apply voucher to cart' })
+  @HttpCode(HttpStatus.OK)
+  async applyVoucher(
+    @AuthUser() user: User,
+    @Param('voucherCode') voucherCode: string,
+  ) {
+    const result = await this.service.applyVoucher(user, voucherCode);
+    return { message: 'Apply voucher successfully', data: result };
+  }
+
+  @Delete('voucher')
+  @Auth()
+  @ApiOperation({ summary: 'Remove voucher from cart' })
+  @HttpCode(HttpStatus.OK)
+  async removeVoucher(@AuthUser() user: User) {
+    const result = await this.service.removeVoucher(user);
+    return { message: 'Remove voucher successfully', data: result };
+  }
+
+  @Post('checkout')
+  @Auth()
+  @ApiOperation({ summary: 'Checkout cart to create order' })
+  @HttpCode(HttpStatus.CREATED)
+  async checkout(@AuthUser() user: User, @Body() checkoutDto?: any) {
+    // This endpoint will redirect to order service
+    return {
+      message:
+        'Để checkout giỏ hàng, vui lòng sử dụng endpoint POST /v1/orders/from-cart',
+      redirectTo: '/v1/orders/from-cart',
+      method: 'POST',
+    };
   }
 }

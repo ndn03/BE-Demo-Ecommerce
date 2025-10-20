@@ -170,10 +170,10 @@ export enum ETargetReceiverGroup {
 }
 
 export enum EtargetType {
-  ALL = '0',
-  BRAND = '1',
-  CATEGORY = '2',
-  PRODUCT = '3',
+  ALL = 0,
+  BRAND = 1,
+  CATEGORY = 2,
+  PRODUCT = 3,
 }
 export const CHUNK_SIZE = 100; // Kích thước chunk tối đa cho các thao tác phân mảnh
 

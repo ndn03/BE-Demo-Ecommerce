@@ -19,6 +19,7 @@ import {
 import { VoucherRecipient } from './voucher.user.entity';
 import { VoucherHistory } from './voucher.history.entity';
 import { VoucherCampaign } from './voucher.campaign.entity';
+import { VoucherTemplate } from './voucher.template.entity';
 @Entity('vouchers')
 export class VoucherEntity extends PersonWithTrackingEntity {
   @PrimaryGeneratedColumn()
@@ -30,12 +31,22 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   @Column({ type: 'int', nullable: true })
   campaignId: number; // ID của campaign chứa voucher này
 
+  @Column({ type: 'int', nullable: true })
+  templateId: number; // ID của template (nếu tạo tự động)
+
   @ManyToOne(() => VoucherCampaign, (campaign) => campaign.vouchers, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'campaignId' })
   campaign: VoucherCampaign; // Mối quan hệ với campaign
+
+  @ManyToOne(() => VoucherTemplate, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'templateId' })
+  template: VoucherTemplate; // Mối quan hệ với template (nếu auto-generated)
 
   @Column({ type: 'decimal', precision: 5, scale: 3, default: 0 })
   value_discount: number;
@@ -56,7 +67,7 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   })
   targetReceiverGroup: ETargetReceiverGroup;
 
-  // NOTE: receiverIds và voucher_productIds đã được thay thế bằng relationship tables
+  // NOTE: receiverIds và list_targetType đã được thay thế bằng relationship tables
   // Sử dụng VoucherRecipient và VoucherProductEntity thay thế
   // @Column({ type: 'json', nullable: true })
   // receiverIds: number[]; // list id receivers
@@ -65,7 +76,7 @@ export class VoucherEntity extends PersonWithTrackingEntity {
   targetType: EtargetType;
 
   // @Column({ type: 'json', nullable: true })
-  // voucher_productIds: number[]; // list id products
+  // list_targetType: number[]; // list id products
 
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   min_order_value: number | null; // Giá trị đơn hàng tối thiểu để áp dụng voucher
@@ -91,12 +102,6 @@ export class VoucherEntity extends PersonWithTrackingEntity {
     default: EVoucherStatus.ACTIVE,
   })
   status: EVoucherStatus;
-
-  @Column({ type: 'timestamp', nullable: true })
-  validFrom: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  validTo: Date;
 
   @OneToMany(() => CartEntity, (cart) => cart.voucher)
   cart: CartEntity[];

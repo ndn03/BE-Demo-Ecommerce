@@ -20,6 +20,9 @@ export class OrdersEntity extends PersonWithTrackingEntity {
   @Column()
   orderNumber: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  shippingAddress?: string;
+
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
 
@@ -28,6 +31,12 @@ export class OrdersEntity extends PersonWithTrackingEntity {
 
   @Column()
   status: EStatusOrder;
+
+  @Column({ type: 'text', nullable: true })
+  reason?: string; // Lý do cập nhật trạng thái (hủy đơn, trả hàng, etc.)
+
+  @Column({ type: 'text', nullable: true })
+  note?: string; // Ghi chú thêm cho đơn hàng
 
   @Column()
   total: number;

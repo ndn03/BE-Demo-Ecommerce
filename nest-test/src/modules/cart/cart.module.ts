@@ -9,11 +9,13 @@ import { UserService } from '../user/user.service';
 import { ProductModule } from '../product/product.module';
 import { User } from '@src/entities/user.entity';
 import { UserModule } from '../user/user.module';
+import { VoucherModule } from '../voucher/voucher.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CartEntity, CartItemEntity, User]),
     ProductModule,
     UserModule,
+    VoucherModule,
   ],
   providers: [CartService],
   controllers: [CartController],

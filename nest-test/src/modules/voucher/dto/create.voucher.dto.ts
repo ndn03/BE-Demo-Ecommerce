@@ -93,7 +93,8 @@ export class CreateVoucherDto {
   @ApiPropertyOptional({
     example: ETargetReceiverGroup.HUMAN_RESOURCES,
     enum: ETargetReceiverGroup,
-    description: 'Receiver group (0: ALL, 1: HR, 2: EMPLOYEE)',
+    description:
+      'Receiver group (0: ALL, 1: HR, 2: EMPLOYEE, 3: CUSTOMER, 4: ALL_CUSTOMER)',
   })
   @Expose()
   targetReceiverGroup?: ETargetReceiverGroup;
@@ -104,7 +105,7 @@ export class CreateVoucherDto {
   @IsInt({ each: true, message: 'ID người nhận phải là một mảng số nguyên' })
   @ApiPropertyOptional({
     description: 'List of receiver IDs',
-    example: [36, 37, 38],
+    example: [70, 72, 77],
   })
   @Expose()
   receiverIds?: number[];
@@ -117,11 +118,15 @@ export class CreateVoucherDto {
   })
   @IsNotEmpty({ message: 'targetType should not be empty' })
   @IsEnum(EtargetType, {
-    message: 'targetType must be one of: ALL, BRAND, CATEGORY, PRODUCT',
+    message:
+      'targetType must be one of: ALL= 0, BRAND=1, CATEGORY=2, PRODUCT=3',
   })
+  @Type(() => Number)
   @Transform(({ value }) => {
+    // Convert string number to actual number for enum validation
     if (typeof value === 'string') {
-      return value.toUpperCase().trim();
+      const numValue = parseInt(value, 10);
+      return isNaN(numValue) ? value : numValue;
     }
     return value;
   })
@@ -134,6 +139,10 @@ export class CreateVoucherDto {
   })
   @IsNotEmpty()
   @IsDate()
+  @ValidateIf((o) => o.validFroms != null)
+  @Comparison('now', 'gt', {
+    message: 'Thời gian bắt đầu phải là hiện tại hoặc trong tương lai',
+  })
   @Type(() => Date)
   @Expose()
   validFrom: Date;
@@ -148,14 +157,19 @@ export class CreateVoucherDto {
   @Expose()
   validTo: Date;
 
-  @ApiPropertyOptional({
+  @Type(() => Date)
+  @IsDate()
+  @ValidateIf(() => false)
+  private readonly now: Date = new Date();
+
+  @ApiProperty({
     type: Number,
     description: 'Giá trị đơn hàng tối thiểu để áp dụng voucher',
     example: 100000,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsNumber()
-  @Min(0)
+  @Min(0, { message: 'Giá trị tối thiểu phải lớn hơn hoặc bằng 0' })
   @Expose()
   min_order_value?: number | null;
 
@@ -166,7 +180,7 @@ export class CreateVoucherDto {
   })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(1, { message: 'Giá trị tối đa phải lớn hơn hoặc bằng 1' })
   @Expose()
   max_discount_value?: number | null;
 
@@ -177,7 +191,7 @@ export class CreateVoucherDto {
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: 'Giới hạn sử dụng phải lớn hơn 0' })
   @Expose()
   usage_limit?: number | null;
 
@@ -201,7 +215,7 @@ export class CreateVoucherDto {
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: 'Giới hạn sử dụng cho mỗi người dùng phải lớn hơn 0' })
   @Expose()
   per_user_limit?: number;
 
@@ -223,15 +237,16 @@ export class CreateVoucherDto {
     default: true,
   })
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value === 'true' || value === '1';
-    }
-    if (typeof value === 'number') {
-      return value === 1;
-    }
-    return Boolean(value);
-  })
+  @Type(() => Boolean)
+  // @Transform(({ value }) => {
+  //   if (typeof value === 'string') {
+  //     return value === 'true' || value === '1';
+  //   }
+  //   if (typeof value === 'number') {
+  //     return value === 1;
+  //   }
+  //   return Boolean(value);
+  // })
   @Expose()
   isActive?: boolean;
 
@@ -241,15 +256,16 @@ export class CreateVoucherDto {
     default: false,
   })
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value === 'true' || value === '1';
-    }
-    if (typeof value === 'number') {
-      return value === 1;
-    }
-    return Boolean(value);
-  })
+  @Type(() => Boolean)
+  // @Transform(({ value }) => {
+  //   if (typeof value === 'string') {
+  //     return value === 'true' || value === '1';
+  //   }
+  //   if (typeof value === 'number') {
+  //     return value === 1;
+  //   }
+  //   return Boolean(value);
+  // })
   @Expose()
   isPublic?: boolean;
 
@@ -282,5 +298,5 @@ export class CreateVoucherDto {
     }
   })
   @Expose()
-  voucher_productIds?: number[];
+  list_targetType?: number[];
 }

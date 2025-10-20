@@ -26,6 +26,8 @@ import { BrandsModule } from 'src/modules/brand/brand.module';
 import { ProductModule } from 'src/modules/product/product.module';
 import { CartModule } from '@src/modules/cart/cart.module';
 import { VoucherModule } from './modules/voucher/voucher.module';
+import { OrderModule } from './modules/order/order.module';
+// import { VoucherAutomationModule } from './modules/voucher-automation/voucher-automation.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -70,6 +72,8 @@ import { VoucherModule } from './modules/voucher/voucher.module';
     ProductModule,
     CartModule,
     VoucherModule,
+    OrderModule,
+    // VoucherAutomationModule,
   ],
   controllers: [AppController],
   providers: [

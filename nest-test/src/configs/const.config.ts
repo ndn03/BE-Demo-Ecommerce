@@ -55,3 +55,5 @@ export const ALLOWED_MIME_TYPES_FOR_IMPORT_DATA = [
   'text/csv',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ];
+
+export const FORMAT_DATE = 'YYYY-MM-DD';
