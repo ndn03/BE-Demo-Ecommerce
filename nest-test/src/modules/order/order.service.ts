@@ -86,30 +86,33 @@ export class OrderService {
     body: CreateOrderFromCartDto,
   ): Promise<OrdersEntity> {
     const validatedData = await validateDto(body, CreateOrderFromCartDto);
-    return await this.orderRepository.manager.transaction(async (manager) => {
-      // 🔍 **PHASE 1: GET USER CART** - Lấy cart hiện tại của user
-      const { cart } = await this.cartService.getCartByUser(user);
 
+    return await this.orderRepository.manager.transaction(async (manager) => {
+      // ✅ Lấy repository scoped trong transaction
+      const orderRepo = manager.withRepository(this.orderRepository);
+      const orderItemRepo = manager.withRepository(this.orderItemRepository);
+      const voucherRepo = manager.withRepository(this.voucherRepository);
+
+      // 🔍 PHASE 1: LẤY GIỎ HÀNG
+      const { cart } = await this.cartService.getCartByUser(user);
       if (!cart || !cart.items || cart.items.length === 0) {
         throw new BadRequestException('Giỏ hàng trống, không thể tạo đơn hàng');
       }
 
-      // ✅ **PHASE 2: VALIDATE INVENTORY** - Kiểm tra tồn kho
+      // ✅ PHASE 2: KIỂM TRA TỒN KHO
       await this.validateInventoryAvailability(cart.items, manager);
 
-      // 🎫 **PHASE 3: APPLY VOUCHER** - Áp dụng voucher nếu có
+      // 🎫 PHASE 3: ÁP DỤNG VOUCHER
       let voucher: VoucherEntity | null = null;
       let voucherDiscount = 0;
 
       if (validatedData.voucherCode) {
-        // Extract product IDs for voucher validation
         const productIds = cart.items.map((item) => item.product.id);
 
-        // Use VoucherService for complete validation including product applicability
         voucher = await this.voucherService.checkVoucher(
           await this.getVoucherIdByCode(validatedData.voucherCode, manager),
           productIds,
-          user.id, // Pass userId for instance-level validation
+          user.id,
         );
 
         voucherDiscount = await this.calculateVoucherDiscount(
@@ -118,11 +121,11 @@ export class OrderService {
         );
       }
 
-      // 📦 **PHASE 4: CREATE ORDER** - Tạo đơn hàng
+      // 📦 PHASE 4: TẠO ĐƠN HÀNG
       const orderNumber = await this.generateOrderNumber();
       const finalTotal = Math.max(0, cart.totalPrice - voucherDiscount);
 
-      const newOrder = manager.create(OrdersEntity, {
+      const newOrder = orderRepo.create({
         creatorId: user.id,
         orderNumber,
         user,
@@ -130,45 +133,41 @@ export class OrderService {
         total: finalTotal,
         shippingAddress: validatedData.shippingAddress,
       });
-      const savedOrder = await manager.save(OrdersEntity, newOrder);
-      this.logger.log(`Created order ${orderNumber} for user ${user.id}`);
 
-      // 📋 **PHASE 5: CREATE ORDER ITEMS** - Tạo order items
-      const orderItems: OrderItemsEntity[] = [];
+      const savedOrder = await orderRepo.save(newOrder);
+      this.logger.log(`✅ Created order ${orderNumber} for user ${user.id}`);
 
-      for (const cartItem of cart.items) {
-        const orderItem = manager.create(OrderItemsEntity, {
+      // 📋 PHASE 5: TẠO ORDER ITEMS
+      const orderItems = cart.items.map((cartItem) =>
+        orderItemRepo.create({
           order: savedOrder,
           product: cartItem.product,
           quantity: cartItem.quantity,
           price: cartItem.price,
           totalPrice: cartItem.price * cartItem.quantity,
           voucherCode: validatedData.voucherCode || '',
-          shippingAddress: validatedData.shippingAddress,
-        });
+        }),
+      );
 
-        orderItems.push(orderItem);
-      }
-
-      await manager.save(OrderItemsEntity, orderItems);
+      await orderItemRepo.save(orderItems);
       savedOrder.items = orderItems;
 
-      // 📦 **PHASE 6: UPDATE INVENTORY** - Cập nhật tồn kho
+      // 📦 PHASE 6: CẬP NHẬT TỒN KHO
       await this.updateProductInventory(cart.items, manager);
 
-      // 🎫 **PHASE 7: UPDATE VOUCHER USAGE** - Cập nhật voucher usage
+      // 🎫 PHASE 7: CẬP NHẬT SỬ DỤNG VOUCHER
       if (voucher) {
         await this.updateVoucherUsage(voucher.id, manager);
       }
 
-      // 🧹 **PHASE 8: CLEAR CART** - Xóa giỏ hàng
+      // 🧹 PHASE 8: XÓA GIỎ HÀNG
       await this.cartService.clearCart(user);
 
       this.logger.log(
-        `Order ${orderNumber} created successfully with ${orderItems.length} items`,
+        `📦 Order ${orderNumber} created successfully with ${orderItems.length} items`,
       );
 
-      // 📤 **PHASE 9: RETURN CLEAN RESPONSE** - Trả về response rút gọn
+      // 📤 PHASE 9: TRẢ VỀ RESPONSE RÚT GỌN
       return await this.getCleanOrderResponse(savedOrder.id, manager);
     });
   }

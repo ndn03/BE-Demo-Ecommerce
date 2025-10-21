@@ -11,9 +11,7 @@ docker-compose.yml
 
 README.md
 
-Dockerfile
-
-# *.env*
+*.env*
 
 *.log
 tmp
