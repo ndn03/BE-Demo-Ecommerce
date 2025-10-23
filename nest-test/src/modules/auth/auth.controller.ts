@@ -38,9 +38,15 @@ export class AuthController {
     );
     const tokens = this.authService.createToken(user);
 
+    // Remove password from user object for security
+    const { password, ...userWithoutPassword } = user;
+
     return {
       message: `Login successfully with username ${user.username} with employee code ${user.profile?.code}`,
-      data: tokens,
+      data: {
+        ...tokens,
+        user: userWithoutPassword,
+      },
     };
   }
 

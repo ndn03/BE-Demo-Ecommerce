@@ -1,0 +1,228 @@
+import { ThemeConfig } from 'antd';
+import viVN from 'antd/locale/vi_VN';
+
+export const COLORS = {
+  white: '#FFFFFF',
+  black: '#19211B',
+  backgroundLayoutAdmin: '#F5FCF7',
+  gray: {
+    20: '#FAFBFA',
+    50: '#F3F4F4',
+    100: '#E8E9E8',
+    200: '#D1D3D1',
+    300: '#BABCBB',
+    400: '#A3A6A4',
+    485: '#848885',
+    500: '#8C908D',
+    600: '#757A76',
+    612: '#848885',
+    700: '#5E645F',
+    800: '#474D49',
+    900: '#303732',
+  },
+  green: {
+    50: '#EBF9EE',
+    100: '#CCF1D5',
+    200: '#AEE9BD',
+    300: '#8FE0A4',
+    400: '#71D88B',
+    500: '#52CF72',
+    600: '#34C759',
+    700: '#2CA94C',
+    800: '#2CA94C',
+    900: '#1D6D31',
+    1000: '#155024',
+    1100: '#155024',
+    1200: '#051409',
+  },
+  blue: {
+    50: '#E8F0FF',
+    100: '#C7DAFF',
+    200: '#A5C5FF',
+    300: '#83AFFF',
+    400: '#6299FF',
+    500: '#4083FF',
+    600: '#1E6DFF',
+    700: '#1A5DD9',
+    800: '#154CB2',
+    900: '#113C8C',
+    1000: '#0C2C66',
+    1100: '#081B40',
+    1200: '#030B1A',
+  },
+  red: {
+    50: '#FFECEC',
+    100: '#FFCFCF',
+    200: '#FFB3B3',
+    300: '#FF9696',
+    400: '#FF7A7A',
+    500: '#FF5E5E',
+    600: '#FF4141',
+    700: '#D93737',
+    800: '#B22E2E',
+    900: '#8C2424',
+    1000: '#661A1A',
+    1100: '#401010',
+    1200: '#1A0707',
+  },
+  orange: {
+    50: '#FFF6EA',
+    100: '#FFE9CB',
+    200: '#FFDCAC',
+    300: '#FFCF8D',
+    400: '#FFC26D',
+    500: '#FFB54E',
+    600: '#FFA82F',
+    700: '#D98F28',
+    800: '#B27621',
+    900: '#8C5C1A',
+    1000: '#664313',
+    1100: '#402A0C',
+    1200: '#1A1105',
+  },
+  pink: {
+    50: '#FFF0F8',
+    100: '#FFD9EE',
+    200: '#FFC3E4',
+    300: '#FFACDA',
+    400: '#FF95CF',
+    500: '#FF7FC5',
+    600: '#FF68BB',
+    700: '#D9589F',
+    800: '#B24983',
+    900: '#8C3967',
+    1000: '#662A4B',
+    1100: '#401A2F',
+    1200: '#1A0A13',
+  },
+};
+
+export const THEME_ANTD_CUSTOMIZE_FORM_DISABLE: ThemeConfig = {
+  components: {
+    DatePicker: {
+      colorBgContainerDisabled: COLORS.white, // Nền trắng khi disable
+      colorTextDisabled: COLORS.gray[900], // Text đậm khi disable
+    },
+    Input: {
+      colorBgContainerDisabled: COLORS.white, // Tương tự Input
+      colorTextDisabled: COLORS.gray[900],
+    },
+    Radio: {
+      colorTextDisabled: COLORS.gray[900], // Radio text đậm
+      dotColorDisabled: COLORS.green[600], // Dot vẫn màu xanh
+    },
+  },
+};
+
+export const THEME_ANTD_CONFIG: ThemeConfig = {
+  token: {
+    colorPrimary: COLORS.green[600],
+    fontSize: 14,
+    fontFamily: 'Noto Sans JP , sans-serif',
+    colorText: COLORS.gray[900],
+    lineHeight: 1.5,
+    colorWarning: COLORS.orange[500],
+    colorLink: COLORS.green[600],
+    borderRadius: 8,
+  },
+  components: {
+    Layout: {
+      bodyBg: COLORS.gray[50],
+      headerHeight: 64,
+      headerBg: COLORS.white,
+    },
+    Button: {
+      borderRadius: 8,
+      borderRadiusSM: 8,
+      borderRadiusLG: 8,
+      controlHeight: 44,
+      controlHeightSM: 32,
+      controlHeightLG: 56,
+      paddingInlineSM: 12,
+      paddingInline: 16,
+      paddingInlineLG: 20,
+      paddingBlock: 10,
+      fontWeight: 600,
+      fontSizeLG: 26,
+      fontSizeSM: 12,
+      fontSize: 14,
+      defaultBorderColor: COLORS.green[600],
+      defaultColor: COLORS.green[600],
+      lineWidth: 2,
+    },
+    Table: {
+      fontSize: 14,
+      cellFontSize: 14,
+      rowHoverBg: COLORS.green[50],
+      rowSelectedHoverBg: COLORS.green[50],
+      rowSelectedBg: COLORS.green[50],
+      headerSplitColor: '#F5F6F9',
+      headerBg: '#F5F6F9',
+      fontWeightStrong: 500,
+      footerBg: '#F5F6F9',
+      borderColor: 'rgba(0, 0, 0, 0.12)',
+      headerSortActiveBg: COLORS.green[50],
+      headerSortHoverBg: COLORS.green[50],
+      headerFilterHoverBg: COLORS.green[50],
+      bodySortBg: undefined,
+      cellPaddingInlineMD: 12,
+    },
+    Input: {
+      fontSize: 16,
+      paddingBlock: 9,
+      paddingInline: 16,
+      paddingBlockSM: 6,
+      paddingInlineSM: 16,
+      fontSizeSM: 12,
+    },
+    InputNumber: {
+      paddingBlock: 10.5,
+      paddingInline: 16,
+      fontSize: 16,
+    },
+    Select: {
+      controlHeight: 44,
+      multipleItemHeight: 36,
+      fontSize: 16,
+      optionFontSize: 14,
+      paddingSM: 16,
+      showArrowPaddingInlineEnd: 45,
+    },
+    Checkbox: {
+      borderRadius: 4,
+      borderRadiusOuter: 4,
+      borderRadiusLG: 4,
+      borderRadiusSM: 4,
+    },
+    Collapse: {
+      headerBg: COLORS.white,
+      headerPadding: 24,
+      contentPadding: 24,
+    },
+    DatePicker: {
+      fontSize: 16,
+      paddingInline: 12,
+      paddingInlineSM: 12,
+      controlHeight: 42,
+    },
+    Form: {
+      fontSize: 14,
+    },
+    Typography: {
+      margin: 0,
+      titleMarginBottom: 0,
+      titleMarginTop: 0,
+      fontSizeHeading4: 24,
+      fontSizeHeading5: 18,
+    },
+    Modal: {
+      zIndexBase: 1100,
+      zIndexPopupBase: 1100,
+    },
+  },
+};
+
+export const CUSTOMIZE_LOCALE: typeof viVN = {
+  ...viVN,
+  // Keep the original DatePicker locale from viVN and just override specific parts if needed
+};

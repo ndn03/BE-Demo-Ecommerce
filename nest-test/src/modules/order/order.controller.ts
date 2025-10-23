@@ -196,7 +196,83 @@ export class OrderController {
   }
 
   /**
-   * 🔍 **Lấy chi tiết đơn hàng**
+   * � **Admin - Lấy tất cả đơn hàng**
+   *
+   * **Endpoint:** GET /v1/orders/admin/all
+   * **Logic:** Admin view all orders với pagination
+   */
+  @Get('admin/all')
+  @ApiOperation({
+    summary: 'Admin get all orders',
+    description: 'Get paginated list of all orders for admin management',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by order status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Orders retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            orders: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OrdersEntity' },
+            },
+            total: { type: 'number' },
+            pages: { type: 'number' },
+            currentPage: { type: 'number' },
+          },
+        },
+      },
+    },
+  })
+  async getAllOrders(
+    @Query() queryDto: GetOrdersQueryDto,
+  ): Promise<{
+    message: string;
+    data: {
+      orders: OrdersEntity[];
+      total: number;
+      pages: number;
+      currentPage: number;
+    };
+  }> {
+    const { orders, total, pages } = await this.orderService.getAllOrders(
+      queryDto,
+    );
+
+    return {
+      message: 'Lấy danh sách tất cả đơn hàng thành công',
+      data: {
+        orders,
+        total,
+        pages,
+        currentPage: queryDto.page || 1,
+      },
+    };
+  }
+
+  /**
+   * �🔍 **Lấy chi tiết đơn hàng**
    *
    * **Endpoint:** GET /v1/orders/:id
    * **Logic:** Get order details với ownership validation

@@ -6,6 +6,7 @@ export type TPayloadJwt = {
 export interface IResAuth {
   accessToken: string;
   refreshToken: string;
+  user?: any; // Optional since createToken might not always include user
 }
 
 // export interface ForgotPasswordResponseData {

@@ -425,6 +425,101 @@ export class OrderService {
   }
 
   /**
+   * 👮 **Admin - Lấy tất cả đơn hàng**
+   *
+   * **Logic:**
+   * - Admin có thể xem tất cả orders
+   * - Support pagination và filtering
+   * - Include thông tin user và product details
+   */
+  async getAllOrders(
+    queryDto: GetOrdersQueryDto,
+  ): Promise<{ orders: OrdersEntity[]; total: number; pages: number }> {
+    const { page = 1, limit = 10, status, fromDate, toDate } = queryDto;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.categoryIds', 'categories')
+      .select([
+        // Order basic info
+        'order.id',
+        'order.orderNumber',
+        'order.status',
+        'order.reason',
+        'order.total',
+        'order.shippingAddress',
+        'order.createdAt',
+
+        // User info for admin view
+        'user.id',
+        'user.email',
+        'user.username',
+
+        // User profile info
+        'profile.id',
+        'profile.fullName',
+        'profile.subName',
+
+        // Items summary
+        'items.id',
+        'items.quantity',
+        'items.price',
+
+        // Product summary
+        'product.id',
+        'product.name',
+        'product.price',
+        'product.image',
+
+        // Brand info
+        'brand.id',
+        'brand.name',
+
+        // Category info
+        'categories.id',
+        'categories.name',
+      ])
+      .orderBy('order.createdAt', 'DESC');
+
+    // Apply status filter
+    if (status) {
+      queryBuilder.andWhere('order.status = :status', { status });
+    }
+
+    // Apply date range filter
+    if (fromDate && toDate) {
+      queryBuilder.andWhere('order.createdAt BETWEEN :fromDate AND :toDate', {
+        fromDate: new Date(fromDate),
+        toDate: new Date(toDate),
+      });
+    } else if (fromDate) {
+      queryBuilder.andWhere('order.createdAt >= :fromDate', {
+        fromDate: new Date(fromDate),
+      });
+    } else if (toDate) {
+      queryBuilder.andWhere('order.createdAt <= :toDate', {
+        toDate: new Date(toDate),
+      });
+    }
+
+    // Get total count for pagination
+    const total = await queryBuilder.getCount();
+
+    // Get paginated results
+    const orders = await queryBuilder.skip(skip).take(limit).getMany();
+
+    const pages = Math.ceil(total / limit);
+
+    return { orders, total, pages };
+  }
+
+  /**
    * ✏️ **Cập nhật trạng thái đơn hàng**
    *
    * **Logic:**
