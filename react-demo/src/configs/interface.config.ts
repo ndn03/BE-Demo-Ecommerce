@@ -1,4 +1,4 @@
-import { TUser } from '@src/modules/user';
+import { TUser } from '@modules/user';
 
 export enum EEmployeeType {
   FULL_TIME = 'FULL_TIME',
@@ -12,11 +12,36 @@ export enum EGender {
   FEMALE = 'FEMALE',
 }
 
+export enum EWorkShift {
+  MORNING = 'MORNING',
+  AFTERNOON = 'AFTERNOON',
+  EVENING = 'EVENING',
+  NIGHT = 'NIGHT',
+}
+
+export enum EPosition {
+  INTERN = 'INTERN',
+  JUNIOR = 'JUNIOR',
+  SENIOR = 'SENIOR',
+  TEAM_LEAD = 'TEAM_LEAD',
+  MANAGER = 'MANAGER',
+  DIRECTOR = 'DIRECTOR',
+}
+
+export enum EAccountType {
+  ACCOUNT_ISSUED = 'ACCOUNT_ISSUED',
+  GOOGLE = 'GOOGLE',
+  FACEBOOK = 'FACEBOOK',
+}
+
 export enum ERole {
-  ADMINISTRATOR = 'ADMINISTRATOR',
-  // COMPANY_ADMIN = 'COMPANY_ADMIN',
-  HUMAN_RESOURCES = 'HUMAN_RESOURCES',
-  EMPLOYEE = 'EMPLOYEE',
+  ADMINISTRATOR = 'ADMINISTRATOR', // Admin hệ thống
+  HUMAN_RESOURCES = 'HUMAN_RESOURCES', // HR của công ty
+  EMPLOYEE = 'EMPLOYEE', // Nhân viên công ty
+  CUSTOMER = 'CUSTOMER', // Khách hàng
+  CUSTOMER_VIP1 = 'CUSTOMER_VIP1', // Khách hàng VIP 1
+  CUSTOMER_VIP2 = 'CUSTOMER_VIP2', // Khách hàng VIP 2
+  CUSTOMER_VIP3 = 'CUSTOMER_VIP3', // Khách hàng VIP 3
 }
 
 export interface IStatusCode {
@@ -96,3 +121,15 @@ export enum ETargetReceiverGroup {
   HUMAN_RESOURCES = 1,
   EMPLOYEE = 2,
 }
+
+// API Response Types
+export type TResApi<T = any> = IMessage & {
+  data: T;
+  statusCode?: number;
+};
+
+export type TResApiErr = {
+  message: string;
+  statusText?: string;
+  statusCode?: number;
+};

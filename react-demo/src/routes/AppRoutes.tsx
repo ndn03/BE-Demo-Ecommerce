@@ -1,104 +1,89 @@
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
-import { ConfigProvider } from 'antd';
-import viVN from 'antd/locale/vi_VN';
-import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-// Pages
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
-import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
-import AdminDashboard from '../pages/dashboard/AdminDashboard';
+// Auth pages
+import Login from '@pages/auth/login';
+import Register from '@pages/auth/register';
+import ForgotPassword from '@pages/auth/forgot-password';
+import TestLogin from '@pages/test/login';
+import MockLogin from '@pages/test/mock-login';
+import UserAPITest from '@components/widgets/UserAPITest';
 
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const { isAuthenticated, isLoading } = useAuth();
+// Layout components
+import LayoutApp from '@components/layout';
+import NotFound from '@components/screens/404';
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+// Route configuration
+import routeConfig, { TRouteConfig } from '@route/routeConfig';
+import ProtectedRoute from '@route/protectedRoute';
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
-// Public Route Component (redirect to dashboard if already logged in)
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  console.log(
-    'PublicRoute - isAuthenticated:',
-    isAuthenticated,
-    'isLoading:',
-    isLoading,
-  );
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return !isAuthenticated ? (
-    <>{children}</>
-  ) : (
-    <Navigate to="/dashboard" replace />
-  );
-};
-
-const AppRoutes: React.FC = () => {
+function AppRoutes() {
   return (
-    <ConfigProvider locale={viVN}>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
+    <QueryClientProvider client={queryClient}>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/register" element={<Register />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+        <Route path="/test/login" element={<TestLogin />} />
+        <Route path="/test/mock-login" element={<MockLogin />} />
+        <Route path="/test/api" element={<UserAPITest />} />
+
+        {/* Redirect /login to /auth/login for backward compatibility */}
+        <Route path="/login" element={<Navigate to="/auth/login" replace />} />
+        <Route
+          path="/register"
+          element={<Navigate to="/auth/register" replace />}
+        />
+        <Route
+          path="/forgot-password"
+          element={<Navigate to="/auth/forgot-password" replace />}
+        />
+
+        {/* Protected routes from routeConfig */}
+        {routeConfig.map(
+          ({ path, Element, key, ...args }: TRouteConfig, index: number) => (
             <Route
-              path="/login"
+              path={path}
+              key={index}
               element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <PublicRoute>
-                  <ForgotPasswordPage />
-                </PublicRoute>
-              }
-            />
-            {/* Protected Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
+                <ProtectedRoute keyName={key}>
+                  <LayoutApp>
+                    <Element />
+                  </LayoutApp>
                 </ProtectedRoute>
               }
-            />{' '}
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            {/* 404 - Redirect to dashboard or login */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </ConfigProvider>
+              action={args.action}
+              loader={args.loader}
+            />
+          ),
+        )}
+
+        {/* Default redirect to login */}
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+
+        {/* Catch all - 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
+      {/* React Query DevTools - only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </QueryClientProvider>
   );
-};
+}
 
 export default AppRoutes;

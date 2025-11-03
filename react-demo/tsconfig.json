@@ -19,6 +19,9 @@
     // "checkJs": true /* Report errors in .js files. Works in tandem with allowJs. */,
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "./src/*"
+      ],
       "@src/*": [
         "./src/*"
       ],
@@ -46,8 +49,23 @@
       "@queries/*": [
         "./src/queries/*"
       ],
+      "@routes/*": [
+        "./src/routes/*"
+      ],
+      "@route/*": [
+        "./src/route/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
       "@utils/*": [
         "./src/utils/*"
+      ],
+      "@contexts/*": [
+        "./src/contexts/*"
       ]
     }
   },

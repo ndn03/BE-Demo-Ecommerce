@@ -1,0 +1,382 @@
+// Pages styles
+// Add page-specific styles here
+
+// Global reset for Ant Design form inputs to prevent double borders
+.ant-input-outlined,
+.ant-input-password-outlined {
+  box-shadow: none !important;
+}
+
+.ant-form-item-control-input .ant-input-outlined:focus,
+.ant-form-item-control-input .ant-input-password-outlined:focus {
+  box-shadow: none !important;
+}
+
+.login-page,
+.register-page,
+.forgot-password-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+  }
+
+  .login-container,
+  .register-container,
+  .forgot-password-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 48px 40px;
+    border-radius: 16px;
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    animation: slideUp 0.6s ease-out;
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  .register-container {
+    max-width: 650px;
+  }
+
+  // Logo styling
+  .ant-image {
+    margin-bottom: 8px;
+    
+    img {
+      border-radius: 8px;
+    }
+  }
+
+  // Title and description
+  h2 {
+    color: #1a202c !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    margin-bottom: 8px !important;
+    text-align: center;
+  }
+
+  p {
+    color: #718096 !important;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 32px !important;
+  }
+
+  // Form styling
+  .ant-form {
+    .ant-form-item {
+      margin-bottom: 24px;
+      
+      // Remove extra border and shadow from form item control
+      .ant-form-item-control-input {
+        .ant-form-item-control-input-content {
+          position: relative;
+        }
+      }
+    }
+
+    .ant-form-item-label > label {
+      font-weight: 600;
+      color: #2d3748;
+      font-size: 14px;
+    }
+
+    // Reset ant design form item status styles
+    .ant-form-item-has-error {
+      .ant-input,
+      .ant-input-password,
+      .ant-input-affix-wrapper {
+        border-color: #ff4d4f !important;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1) !important;
+      }
+    }
+
+    // Force remove any default Ant Design shadows and borders
+    .ant-form-item-control-input-content {
+      .ant-input,
+      .ant-input-password,
+      .ant-input-affix-wrapper {
+        box-shadow: none !important;
+        
+        &:not(:focus):not(:hover) {
+          border-color: #e2e8f0 !important;
+        }
+      }
+    }
+
+    .login-button,
+    .register-button,
+    .btn-submit-login,
+    .btn-submit-register,
+    .btn-submit-forgot-password {
+      width: 100%;
+      height: 48px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      &:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        background: #e2e8f0 !important;
+        transform: none;
+        box-shadow: none;
+        color: #a0aec0 !important;
+      }
+    }
+
+    .ant-input,
+    .ant-input-password {
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0 !important;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: none !important;
+      
+      &:focus,
+      &:hover {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+        outline: none !important;
+      }
+
+      &.ant-input-focused {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+      }
+
+      &::placeholder {
+        color: #a0aec0;
+      }
+    }
+
+    // Input with prefix styling
+    .ant-input-affix-wrapper {
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      height: 48px !important;
+      padding: 0 16px !important;
+      box-shadow: none !important;
+      
+      &:hover {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+      }
+
+      &.ant-input-affix-wrapper-focused {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+      }
+
+      .ant-input {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        
+        &:focus {
+          border: none !important;
+          box-shadow: none !important;
+        }
+      }
+
+      .ant-input-prefix {
+        margin-right: 8px;
+        color: #a0aec0;
+      }
+    }
+
+    // Fix for input password wrapper
+    .ant-input-password {
+      border: 1px solid #e2e8f0 !important;
+      
+      &:hover {
+        border-color: #667eea !important;
+      }
+
+      &.ant-input-password-focused {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+      }
+
+      .ant-input {
+        border: none !important;
+        box-shadow: none !important;
+        
+        &:focus {
+          border: none !important;
+          box-shadow: none !important;
+        }
+      }
+    }
+
+    .ant-checkbox-wrapper {
+      color: #4a5568;
+      font-size: 14px;
+      
+      .ant-checkbox-checked .ant-checkbox-inner {
+        background-color: #667eea;
+        border-color: #667eea;
+      }
+
+      &:hover .ant-checkbox-inner {
+        border-color: #667eea;
+      }
+    }
+
+    // Link styles
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #5a67d8;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Terms of Policy Link styling
+  .term-of-policy-link {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    text-align: center;
+    z-index: 1;
+
+    a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+
+      &:hover {
+        color: white;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 16px;
+    
+    .login-container,
+    .register-container,
+    .forgot-password-container {
+      padding: 32px 24px;
+      max-width: 100%;
+      border-radius: 12px;
+    }
+
+    .register-container {
+      max-width: 100%;
+    }
+
+    h2 {
+      font-size: 24px !important;
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-container,
+    .register-container,
+    .forgot-password-container {
+      padding: 24px 20px;
+      margin: 8px;
+    }
+
+    h2 {
+      font-size: 22px !important;
+    }
+
+    .ant-form {
+      .ant-input,
+      .ant-input-password {
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .login-button,
+      .register-button,
+      .btn-submit-login,
+      .btn-submit-register,
+      .btn-submit-forgot-password {
+        height: 44px;
+        font-size: 15px;
+      }
+    }
+  }
+}
+
+.dashboard-page {
+  .page-header {
+    background: white;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Admin pages
+.admin-page {
+  .admin-header {
+    margin-bottom: 24px;
+  }
+}
+
+// User pages  
+.user-page {
+  .user-content {
+    padding: 24px;
+  }
+}

@@ -5,12 +5,18 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { User, AuthTokens } from '../types/auth.types';
-import { authApi } from '../services/auth.service';
+import { TAuthUser } from '@modules/auth';
+import { TUser } from '@modules/user';
+import { signIn, signOut, refreshToken } from '@queries/apis/auth';
 import { message } from 'antd';
+import {
+  getStoredAuth,
+  setStoredAuth,
+  clearStoredAuth,
+} from '@libs/localStorage';
 
 interface AuthContextType {
-  user: User | null;
+  user: TUser | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -26,7 +32,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<TUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,7 +48,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(JSON.parse(savedUser));
         }
       } catch (error) {
-        console.error('Error loading auth state:', error);
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
       } finally {
@@ -56,25 +61,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
-      const response = await authApi.login({ username, password });
-
-      console.log('Full response:', response);
-      console.log('Response data:', response.data);
-      console.log('Response data.data:', response.data.data);
+      const response = await signIn({ username, password });
 
       const { data } = response.data; // This gets the 'data' property from response.data
-
-      console.log('Extracted data:', data);
-      console.log('Access token:', data.accessToken);
-      console.log('User from API:', data.user);
 
       // Backend trả về accessToken
       const accessToken = data.accessToken;
 
       // User object từ API response
       const user = data.user;
-
-      console.log('Final user object:', user);
 
       if (!user) {
         throw new Error('User data not found in response');
@@ -103,9 +98,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      await authApi.logout();
+      await signOut();
     } catch (error) {
-      console.error('Logout error:', error);
+      throw error;
     } finally {
       // Clear local state
       localStorage.removeItem('access_token');
@@ -116,16 +111,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const refreshToken = async (): Promise<void> => {
+  const refreshTokenFunc = async (): Promise<void> => {
     try {
-      const response = await authApi.refreshToken();
+      const response = await refreshToken();
       const { data } = response.data;
 
       const accessToken = data.accessToken;
       localStorage.setItem('access_token', accessToken);
       setToken(accessToken);
     } catch (error) {
-      console.error('Refresh token error:', error);
       logout();
     }
   };
@@ -137,17 +131,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!token && !!user,
     login,
     logout,
-    refreshToken,
+    refreshToken: refreshTokenFunc,
   };
-
-  console.log(
-    'AuthContext - token:',
-    !!token,
-    'user:',
-    !!user,
-    'isAuthenticated:',
-    !!token && !!user,
-  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

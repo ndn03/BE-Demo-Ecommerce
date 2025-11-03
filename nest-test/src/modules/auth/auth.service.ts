@@ -172,7 +172,6 @@ export class AuthService {
       throw new UnauthorizedException('User account is locked');
     }
     const newPassword = this.passwordService.generateRandomPassword(7);
-
     const hashedPassword = this.passwordService.hashingPassword(newPassword);
     const result = await this.userRepository.update(account.id, {
       password: hashedPassword,
